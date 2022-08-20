@@ -1,0 +1,6 @@
+name: ThereISWay
+version: '${project.version}'
+main: com.tomo.thereisway.ThereISWay
+api-version: 1.19
+authors: [ TOMO ]
+description: Simple plugin for creating waypoints
