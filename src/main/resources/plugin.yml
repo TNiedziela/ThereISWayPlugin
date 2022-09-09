@@ -4,3 +4,7 @@ main: com.tomo.thereisway.ThereISWay
 api-version: 1.19
 authors: [ TOMO ]
 description: Simple plugin for creating waypoints
+
+commands:
+  createWaypoint:
+    aliases: [wpcreate]
