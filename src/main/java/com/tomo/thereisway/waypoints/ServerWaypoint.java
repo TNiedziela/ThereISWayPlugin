@@ -2,20 +2,24 @@ package com.tomo.thereisway.waypoints;
 
 import org.bukkit.Location;
 
-public class ServerWaypoint{
+import java.util.Optional;
 
-    private final Location waypointLocation;
+public class ServerWaypoint extends Waypoint{
 
-    private ServerWaypoint(Location waypointLocation) {
-        this.waypointLocation = waypointLocation;
+    private String waypointName;
+
+    private ServerWaypoint(Location waypointLocation, String waypointName) {
+        this.waypointName = waypointName;
+        super.placement = waypointLocation;
     }
 
-    public static ServerWaypoint createWaypoint(Location waypointLocation) {
-        return new ServerWaypoint(waypointLocation);
+    public static ServerWaypoint createWaypoint(Location waypointLocation, String waypointName) {
+        return new ServerWaypoint(waypointLocation, waypointName);
     }
 
-    public String getLocation() {
-        return "x = " + this.waypointLocation.getBlockX() + ", y = " + this.waypointLocation.getBlockY() + ", z = " + this.waypointLocation.getBlockZ();
+    @Override
+    public void saveWaypoint() {
+        return;
     }
 
     public void deleteWaypoint() {

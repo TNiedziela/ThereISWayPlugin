@@ -6,5 +6,5 @@ authors: [ TOMO ]
 description: Simple plugin for creating waypoints
 
 commands:
-  createWaypoint:
-    aliases: [wpcreate]
+  waypoint:
+    aliases: [wp]
