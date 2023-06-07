@@ -18,6 +18,10 @@ public class WaypointManagementService {
     }
 
     public PlayerWaypoint createPlayerWaypoint(Player player, String waypointName) {
+        if (waypointName.isEmpty()) {
+            player.sendMessage("Waypoint name not provided. aborting waypoint creation.");
+            return null;
+        }
         Location playerLocation = player.getLocation();
         PlayerWaypoint newPlayerWaypoint = PlayerWaypoint.createWaypoint(playerLocation, player, waypointName);
         player.sendMessage("Created new waypoint at: " + newPlayerWaypoint.getLocation());

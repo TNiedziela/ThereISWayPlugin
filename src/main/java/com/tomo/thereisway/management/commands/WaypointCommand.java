@@ -1,6 +1,7 @@
 package com.tomo.thereisway.management.commands;
 
 import com.tomo.thereisway.ThereISWay;
+import com.tomo.thereisway.management.utilities.ChatUtils;
 import com.tomo.thereisway.management.waypoints.WaypointManagementService;
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
 import com.tomo.thereisway.waypoints.ServerWaypoint;
@@ -10,16 +11,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class WaypointCommand implements CommandExecutor {
-
     private final ThereISWay plugin;
 
-    private WaypointManagementService waypointManagementService;
+    private final WaypointManagementService waypointManagementService;
 
     public WaypointCommand(ThereISWay plugin) {
         this.plugin = plugin;
@@ -39,63 +36,49 @@ public class WaypointCommand implements CommandExecutor {
             player.sendMessage("You are not permitted to create waypoints!");
             return true;
         } else {
-            String actualCommand = commandArgs.get(0);
+            WaypointCommandType actualCommand = WaypointCommandType.get(commandArgs.get(0)).orElse(WaypointCommandType.WRONG);
             String waypointName = commandArgs.size() == 2 ? commandArgs.get(1) : "";
-            if (!isSupportedCommand(actualCommand)) {
-                player.sendMessage("Wrong command parameters provided");
-                return true;
-            }
-            switch (actualCommand) {
-                case "create" -> {
-                    if (waypointName.isEmpty()) {
-                        player.sendMessage("Waypoint name not provided. aborting waypoint creation.");
-                        return true;
-                    }
-                    waypointManagementService.createPlayerWaypoint(player, waypointName);
-                }
-                case "delete" -> {
-                    if (waypointName.isEmpty()) {
-                        player.sendMessage("Waypoint name not provided. aborting waypoint deletion.");
-                        return true;
-                    }
-                    deletePlayerWaypoint(player, waypointName);
-                }
-                case "move" -> {
-                    if (waypointName.isEmpty()) {
-                        player.sendMessage("You must provide name of the waypoint that you want to teleport to.");
-                        return true;
-                    }
-                    movePlayerIfPossible(player, waypointName);
-                }
-                case "show" -> showPlayerHisWaypoints(player);
-
-                case "showAll" -> showAllWaypoints(player);
-            }
+            Map<WaypointCommandType, Runnable> commands = getCommands(player, waypointName);
+            commands.get(actualCommand).run();
         }
         return false;
     }
 
+    private Map<WaypointCommandType, Runnable> getCommands(Player player, String waypointName) {
+        Map<WaypointCommandType, Runnable> commands = new HashMap<>();
+        commands.put(WaypointCommandType.CREATE, () -> waypointManagementService.createPlayerWaypoint(player, waypointName));
+        commands.put(WaypointCommandType.DELETE, () -> deletePlayerWaypoint(player, waypointName));
+        commands.put(WaypointCommandType.MOVE, () -> movePlayerIfPossible(player, waypointName));
+        commands.put(WaypointCommandType.SHOW, () -> showPlayerHisWaypoints(player));
+        commands.put(WaypointCommandType.SHOW_ALL, () -> showAllWaypoints(player));
+        commands.put(WaypointCommandType.WRONG, () -> wrongCommandProvidedMessage(player));
+        return commands;
+    }
+
     private void movePlayerIfPossible(Player player, String waypointName) {
+        if (waypointName.isEmpty()) {
+            player.sendMessage("You must provide name of the waypoint that you want to teleport to.");
+            return;
+        }
         Optional<PlayerWaypoint> playerWaypoint = waypointManagementService.getPlayerWaypointByNameIfExists(player, waypointName);
         if (playerWaypoint.isEmpty()) {
             player.sendMessage("You don't have waypoint with such name (" + waypointName + ")");
         } else {
             PlayerWaypoint waypoint = playerWaypoint.get();
             player.teleport(waypoint.getPlacement());
-            player.sendMessage("Successfully moved to: " + waypointName);
+            player.sendMessage(ChatUtils.asGreenMessage("Successfully moved to: " + waypointName));
         }
     }
 
-    private boolean isSupportedCommand(String command) {
-        return command.equals("create")
-                || command.equals("delete")
-                || command.equals("show")
-                || command.equals("move")
-                || command.equals("showAll");
+    private void deletePlayerWaypoint(Player player, String waypointName) { //todo implement
+        if (waypointName.isEmpty()) {
+            player.sendMessage("Waypoint name not provided. aborting waypoint deletion.");
+        }
+        return;
     }
 
-    private void deletePlayerWaypoint(Player player, String waypointName) { //todo implement
-        return;
+    private void wrongCommandProvidedMessage(Player player) {
+        player.sendMessage(ChatUtils.asRedMessage("Wrong command provided!\n"));
     }
 
     private void createServerWaypoint(Player player, String waypointName) {
@@ -111,7 +94,7 @@ public class WaypointCommand implements CommandExecutor {
         }
         player.sendMessage("List of owned waypoints: ");
         for (PlayerWaypoint waypoint : ownedByPlayerWaypoints) {
-            player.sendMessage(waypoint.toString());
+            player.sendMessage(waypoint.asClickableColoredMessage());
         }
     }
 
@@ -120,6 +103,31 @@ public class WaypointCommand implements CommandExecutor {
         player.sendMessage("List of all waypoints: ");
         for (PlayerWaypoint waypoint : waypoints) {
             player.sendMessage(waypoint.toString());
+        }
+    }
+
+    public enum WaypointCommandType {
+        CREATE("create"),
+        DELETE("delete"),
+        MOVE("move"),
+        SHOW("show"),
+        SHOW_ALL("showAll"),
+        WRONG("wrongCommand");
+
+        private String cmd;
+
+        WaypointCommandType(String cmd) {
+            this.cmd = cmd;
+        }
+
+        public String getCmd() {
+            return cmd;
+        }
+
+        public static Optional<WaypointCommandType> get(String cmdProvided) {
+            return Arrays.stream(WaypointCommandType.values())
+                    .filter(val -> val.cmd.equals(cmdProvided))
+                    .findFirst();
         }
     }
 }
