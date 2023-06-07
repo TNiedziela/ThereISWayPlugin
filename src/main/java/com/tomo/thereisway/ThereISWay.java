@@ -5,6 +5,7 @@ import com.tomo.thereisway.management.listeners.WpListener;
 import com.tomo.thereisway.management.waypoints.WaypointHolder;
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
 import com.tomo.thereisway.waypoints.ServerWaypoint;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
@@ -39,6 +40,10 @@ public final class ThereISWay extends JavaPlugin {
 
     public void addServerWaypoint(ServerWaypoint serverWaypoint) {
         waypointHolder.addServerWaypoint(serverWaypoint);
+    }
+
+    public void deletePlayerWaypoint(Player player, String waypointName) {
+        waypointHolder.deletePlayerWaypoint(player, waypointName);
     }
 
     public List<PlayerWaypoint> getPlayerWaypoints() {

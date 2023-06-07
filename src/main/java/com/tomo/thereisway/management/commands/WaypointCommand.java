@@ -47,7 +47,7 @@ public class WaypointCommand implements CommandExecutor {
     private Map<WaypointCommandType, Runnable> getCommands(Player player, String waypointName) {
         Map<WaypointCommandType, Runnable> commands = new HashMap<>();
         commands.put(WaypointCommandType.CREATE, () -> waypointManagementService.createPlayerWaypoint(player, waypointName));
-        commands.put(WaypointCommandType.DELETE, () -> deletePlayerWaypoint(player, waypointName));
+        commands.put(WaypointCommandType.DELETE, () -> waypointManagementService.deletePlayerWaypoint(player, waypointName));
         commands.put(WaypointCommandType.MOVE, () -> movePlayerIfPossible(player, waypointName));
         commands.put(WaypointCommandType.SHOW, () -> showPlayerHisWaypoints(player));
         commands.put(WaypointCommandType.SHOW_ALL, () -> showAllWaypoints(player));
@@ -68,13 +68,6 @@ public class WaypointCommand implements CommandExecutor {
             player.teleport(waypoint.getPlacement());
             player.sendMessage(ChatUtils.asGreenMessage("Successfully moved to: " + waypointName));
         }
-    }
-
-    private void deletePlayerWaypoint(Player player, String waypointName) { //todo implement
-        if (waypointName.isEmpty()) {
-            player.sendMessage("Waypoint name not provided. aborting waypoint deletion.");
-        }
-        return;
     }
 
     private void wrongCommandProvidedMessage(Player player) {

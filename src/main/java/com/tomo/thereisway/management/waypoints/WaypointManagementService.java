@@ -10,6 +10,10 @@ import org.bukkit.entity.Player;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service provides tools to manage creating, deleting and editing waypoints.
+ **/
+
 public class WaypointManagementService {
     private final ThereISWay plugin;
 
@@ -31,6 +35,23 @@ public class WaypointManagementService {
         event.callEvent();
         return newPlayerWaypoint;
     }
+
+    public void deletePlayerWaypoint(Player player, String waypointName) {
+        if (waypointName.isEmpty()) {
+            player.sendMessage("Waypoint name not provided. aborting waypoint deletion.");
+            return;
+        }
+        List<PlayerWaypoint> playerWaypoints = getWaypointsOwnedByPlayer(player);
+        Optional<PlayerWaypoint> desiredWaypoint = playerWaypoints.stream().filter(wp -> wp.getWaypointName().equals(waypointName)).findFirst();
+        if (desiredWaypoint.isEmpty()) {
+            player.sendMessage("You don't own waypoint with such name.");
+            return;
+        }
+        plugin.deletePlayerWaypoint(player, waypointName);
+        WaypointModifiedEvent event = new WaypointModifiedEvent(desiredWaypoint.get());
+        event.callEvent();
+    }
+
 
     public ServerWaypoint createServerWaypoint(Player player, String waypointName) {
         Location playerLocation = player.getLocation();

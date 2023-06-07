@@ -3,6 +3,7 @@ package com.tomo.thereisway.management.waypoints;
 
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
 import com.tomo.thereisway.waypoints.ServerWaypoint;
+import org.bukkit.entity.Player;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 
@@ -58,6 +59,15 @@ public class WaypointHolder implements Serializable {
 
     public void addServerWaypoint(ServerWaypoint serverWaypoint) {
         serverWaypoints.add(serverWaypoint);
+    }
+
+    public void deletePlayerWaypoint(Player player, String waypointName) {
+        for (int i = 0; i < playerWaypoints.size(); i++) {
+            if (playerWaypoints.get(i).isOwnedByPlayer(player) && playerWaypoints.get(i).getWaypointName().equals(waypointName)) {
+                playerWaypoints.remove(i);
+                break;
+            }
+        }
     }
 
     public List<PlayerWaypoint> getPlayerWaypoints() {
