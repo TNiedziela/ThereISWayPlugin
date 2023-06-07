@@ -2,12 +2,14 @@ package com.tomo.thereisway.management.commands;
 
 import com.tomo.thereisway.ThereISWay;
 import com.tomo.thereisway.management.utilities.ChatUtils;
+import com.tomo.thereisway.management.utilities.WaypointCommandTabCompleter;
 import com.tomo.thereisway.management.waypoints.WaypointManagementService;
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
 import com.tomo.thereisway.waypoints.ServerWaypoint;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,17 +23,18 @@ public class WaypointCommand implements CommandExecutor {
     public WaypointCommand(ThereISWay plugin) {
         this.plugin = plugin;
         this.waypointManagementService = new WaypointManagementService(plugin);
-        Objects.requireNonNull(plugin.getCommand("waypoint")).setExecutor(this);
+        PluginCommand command = Objects.requireNonNull(plugin.getCommand("waypoint"));
+        command.setTabCompleter(new WaypointCommandTabCompleter());
+        command.setExecutor(this);
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         List<String> commandArgs = Arrays.asList(args);
-        if (!(commandSender instanceof Player)) {
+        if (!(commandSender instanceof Player player)) {
             commandSender.sendMessage("Waypoint creation is possible only by players!");
             return true;
         }
-        Player player = (Player) commandSender;
         if (!player.isOp()) {
             player.sendMessage("You are not permitted to create waypoints!");
             return true;
@@ -107,7 +110,7 @@ public class WaypointCommand implements CommandExecutor {
         SHOW_ALL("showAll"),
         WRONG("wrongCommand");
 
-        private String cmd;
+        private final String cmd;
 
         WaypointCommandType(String cmd) {
             this.cmd = cmd;
@@ -115,6 +118,10 @@ public class WaypointCommand implements CommandExecutor {
 
         public String getCmd() {
             return cmd;
+        }
+
+        public boolean isProper() {
+            return !this.equals(WRONG);
         }
 
         public static Optional<WaypointCommandType> get(String cmdProvided) {
