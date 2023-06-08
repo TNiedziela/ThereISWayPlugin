@@ -36,6 +36,26 @@ public class WaypointHolder implements Serializable {
         }
     }
 
+    public boolean saveDataToTextFile(String filePath) {
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileWriter writer = new FileWriter(file);
+            for (PlayerWaypoint waypoint : playerWaypoints) {
+                String line = "[" + waypoint.getWaypointName() + "|" + waypoint.getOwnerID().toString() + "|" + waypoint.getLocation() + "]\n";
+                writer.write(line);
+            }
+            writer.close();
+
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public static WaypointHolder loadData(String filePath) {
         try {
             File file = new File(filePath);

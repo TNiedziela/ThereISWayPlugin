@@ -13,6 +13,7 @@ import java.util.List;
 public final class ThereISWay extends JavaPlugin {
 
     private final String WAYPOINTS_FILE = "waypoints/wp_save.data";
+    private final String WAYPOINTS_FILE_TEXT = "waypoints/wp_save.txt";
 
     private WaypointHolder waypointHolder;
 
@@ -31,6 +32,7 @@ public final class ThereISWay extends JavaPlugin {
 
     public void saveWaypoints() {
         waypointHolder.saveData(WAYPOINTS_FILE);
+        waypointHolder.saveDataToTextFile(WAYPOINTS_FILE_TEXT);
         System.out.println("Waypoint config saved");
     }
 

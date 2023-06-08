@@ -13,7 +13,8 @@ import java.util.UUID;
 
 public class PlayerWaypoint extends Waypoint{
 
-    private String waypointName;
+    private final String waypointName;
+
     private final UUID ownerID;
 
     public PlayerWaypoint(Location placement, Player owner, String waypointName) {
@@ -28,6 +29,10 @@ public class PlayerWaypoint extends Waypoint{
 
     public boolean isOwnedByPlayer(Player player) {
         return Objects.equals(player.getPlayerProfile().getId(), ownerID);
+    }
+
+    public UUID getOwnerID() {
+        return ownerID;
     }
 
     public String getWaypointName() {
