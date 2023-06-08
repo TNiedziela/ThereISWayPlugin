@@ -7,6 +7,7 @@ import com.tomo.thereisway.management.waypoints.WaypointManagementService;
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
 import com.tomo.thereisway.waypoints.ServerWaypoint;
 import com.tomo.thereisway.waypoints.Waypoint;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -71,17 +72,24 @@ public class WaypointCommand implements CommandExecutor {
             player.sendMessage("You don't have waypoint with such name (" + waypointName + ")");
         } else {
             PlayerWaypoint waypoint = playerWaypoint.get();
-            movePlayerToWaypointAndApplyEffects(player, waypoint, 30);
+            movePlayerToWaypointAndApplyEffects(player, waypoint);
         }
     }
 
-    private void movePlayerToWaypointAndApplyEffects(Player player, Waypoint waypoint, int moveDurationInTicks) {
-        player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, moveDurationInTicks, 20));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, moveDurationInTicks, 20));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, moveDurationInTicks, 1000));
+    private void movePlayerToWaypointAndApplyEffects(Player player, Waypoint waypoint) {
+        int moveDurationInTicks = 60;
+        applyTeleportEffectOnPlayer(player);
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> player.teleport(waypoint.getPlacement()), moveDurationInTicks);
+        Bukkit.getScheduler().runTaskLater(this.plugin, () -> player
+                        .playSound(Sound.sound(org.bukkit.Sound.ENTITY_ENDERMAN_TELEPORT.key(), Sound.Source.PLAYER, 1f, 1f)), moveDurationInTicks);
         Bukkit.getScheduler().runTaskLater(this.plugin,
-                () -> player.sendMessage(ChatUtils.asGreenMessage("Successfully moved to: " + waypoint.getWaypointName())), 2);
+                () -> player.sendMessage(ChatUtils.asGreenMessage("Successfully moved to: " + waypoint.getWaypointName())), moveDurationInTicks);
+    }
+
+    private void applyTeleportEffectOnPlayer(Player player) {
+        player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 60, 1));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 4));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60, 100));
     }
 
     private void movePlayerToServerWaypointIfPossible(Player player, String waypointName) {
