@@ -7,7 +7,8 @@ import java.io.Serializable;
 
 public abstract class Waypoint implements Serializable {
 
-    Location placement;
+    protected String waypointName;
+    protected Location placement;
 
     public Waypoint() {}
 
@@ -15,9 +16,12 @@ public abstract class Waypoint implements Serializable {
         return placement;
     }
 
+    public String getWaypointName() {
+        return waypointName;
+    }
+
     public String getLocation() {
         return "x = " + this.placement.getBlockX() + ", y = " + this.placement.getBlockY() + ", z = " + this.placement.getBlockZ();
     }
 
-    protected abstract void saveWaypoint();
 }

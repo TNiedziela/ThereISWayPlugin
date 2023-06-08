@@ -2,14 +2,15 @@ package com.tomo.thereisway.waypoints;
 
 import org.bukkit.Location;
 
-import java.util.Optional;
-
+/**
+ * Server waypoints will be used mostly with items like pressure plates etc. in the future.
+ */
 public class ServerWaypoint extends Waypoint{
 
-    private String waypointName;
 
     private ServerWaypoint(Location waypointLocation, String waypointName) {
-        this.waypointName = waypointName;
+        super();
+        super.waypointName = waypointName;
         super.placement = waypointLocation;
     }
 
@@ -17,12 +18,4 @@ public class ServerWaypoint extends Waypoint{
         return new ServerWaypoint(waypointLocation, waypointName);
     }
 
-    @Override
-    public void saveWaypoint() {
-        return;
-    }
-
-    public void deleteWaypoint() {
-
-    }
 }

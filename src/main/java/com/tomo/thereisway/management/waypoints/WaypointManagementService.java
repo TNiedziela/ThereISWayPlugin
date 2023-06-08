@@ -21,10 +21,10 @@ public class WaypointManagementService {
         this.plugin = plugin;
     }
 
-    public PlayerWaypoint createPlayerWaypoint(Player player, String waypointName) {
+    public void createPlayerWaypoint(Player player, String waypointName) {
         if (waypointName.isEmpty()) {
             player.sendMessage("Waypoint name not provided. aborting waypoint creation.");
-            return null;
+            return;
         }
         Location playerLocation = player.getLocation();
         PlayerWaypoint newPlayerWaypoint = PlayerWaypoint.createWaypoint(playerLocation, player, waypointName);
@@ -33,7 +33,6 @@ public class WaypointManagementService {
 
         WaypointModifiedEvent event = new WaypointModifiedEvent(newPlayerWaypoint);
         event.callEvent();
-        return newPlayerWaypoint;
     }
 
     public void deletePlayerWaypoint(Player player, String waypointName) {
@@ -53,17 +52,28 @@ public class WaypointManagementService {
     }
 
 
-    public ServerWaypoint createServerWaypoint(Player player, String waypointName) {
+    public void createServerWaypoint(Player player, String waypointName) {
         Location playerLocation = player.getLocation();
         ServerWaypoint newServerWaypoint = ServerWaypoint.createWaypoint(playerLocation, waypointName);
         player.sendMessage("Created new server waypoint at: " + newServerWaypoint.getLocation());
+        plugin.addServerWaypoint(newServerWaypoint);
+
         WaypointModifiedEvent event = new WaypointModifiedEvent(newServerWaypoint);
         event.callEvent();
-        return newServerWaypoint;
     }
 
     public Optional<PlayerWaypoint> getPlayerWaypointByNameIfExists(Player player, String waypointName) {
         List<PlayerWaypoint> waypointsWithSuchName = getWaypointsOwnedByPlayer(player).stream()
+                .filter(waypoint -> waypoint.getWaypointName().equals(waypointName))
+                .toList();
+        if (waypointsWithSuchName.size() != 1) {
+            return Optional.empty();
+        }
+        return Optional.of(waypointsWithSuchName.get(0));
+    }
+
+    public Optional<ServerWaypoint> getServerWaypointByNameIfExists(String waypointName) {
+        List<ServerWaypoint> waypointsWithSuchName = plugin.getServerWaypoints().stream()
                 .filter(waypoint -> waypoint.getWaypointName().equals(waypointName))
                 .toList();
         if (waypointsWithSuchName.size() != 1) {

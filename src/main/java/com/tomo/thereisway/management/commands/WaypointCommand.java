@@ -51,16 +51,15 @@ public class WaypointCommand implements CommandExecutor {
         Map<WaypointCommandType, Runnable> commands = new HashMap<>();
         commands.put(WaypointCommandType.CREATE, () -> waypointManagementService.createPlayerWaypoint(player, waypointName));
         commands.put(WaypointCommandType.DELETE, () -> waypointManagementService.deletePlayerWaypoint(player, waypointName));
-        commands.put(WaypointCommandType.MOVE, () -> movePlayerIfPossible(player, waypointName));
+        commands.put(WaypointCommandType.MOVE, () -> movePlayerToPlayerWaypointIfPossible(player, waypointName));
         commands.put(WaypointCommandType.SHOW, () -> showPlayerHisWaypoints(player));
         commands.put(WaypointCommandType.SHOW_ALL, () -> showAllWaypoints(player));
         commands.put(WaypointCommandType.WRONG, () -> wrongCommandProvidedMessage(player));
         return commands;
     }
 
-    private void movePlayerIfPossible(Player player, String waypointName) {
-        if (waypointName.isEmpty()) {
-            player.sendMessage("You must provide name of the waypoint that you want to teleport to.");
+    private void movePlayerToPlayerWaypointIfPossible(Player player, String waypointName) {
+        if (waypointNameNotProvided(player, waypointName)) {
             return;
         }
         Optional<PlayerWaypoint> playerWaypoint = waypointManagementService.getPlayerWaypointByNameIfExists(player, waypointName);
@@ -73,14 +72,32 @@ public class WaypointCommand implements CommandExecutor {
         }
     }
 
+    private void movePlayerToServerWaypointIfPossible(Player player, String waypointName) {
+        if (waypointNameNotProvided(player, waypointName)) {
+            return;
+        }
+        Optional<ServerWaypoint> serverWaypoint = waypointManagementService.getServerWaypointByNameIfExists(waypointName);
+        if (serverWaypoint.isEmpty()) {
+            player.sendMessage("There is no server waypoint with such name (" + waypointName + ")");
+        } else {
+            ServerWaypoint waypoint = serverWaypoint.get();
+            player.teleport(waypoint.getPlacement());
+            player.sendMessage(ChatUtils.asGreenMessage("Successfully moved to: " + waypointName));
+        }
+    }
+
+    private boolean waypointNameNotProvided(Player player, String waypointName) {
+        if (waypointName.isEmpty()) {
+            player.sendMessage("You must provide name of the waypoint that you want to teleport to.");
+            return true;
+        }
+        return false;
+    }
+
     private void wrongCommandProvidedMessage(Player player) {
         player.sendMessage(ChatUtils.asRedMessage("Wrong command provided!\n"));
     }
 
-    private void createServerWaypoint(Player player, String waypointName) {
-        ServerWaypoint serverWaypoint = waypointManagementService.createServerWaypoint(player, waypointName);
-        plugin.addServerWaypoint(serverWaypoint);
-    }
 
     private void showPlayerHisWaypoints(Player player) {
         List<PlayerWaypoint> ownedByPlayerWaypoints = waypointManagementService.getWaypointsOwnedByPlayer(player);

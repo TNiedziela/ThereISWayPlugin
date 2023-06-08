@@ -13,11 +13,12 @@ import java.util.UUID;
 
 public class PlayerWaypoint extends Waypoint{
 
-    private String waypointName;
+
     private final UUID ownerID;
 
     public PlayerWaypoint(Location placement, Player owner, String waypointName) {
-        this.waypointName = waypointName;
+        super();
+        super.waypointName = waypointName;
         super.placement = placement;
         this.ownerID = owner.getPlayerProfile().getId();
     }
@@ -30,14 +31,6 @@ public class PlayerWaypoint extends Waypoint{
         return Objects.equals(player.getPlayerProfile().getId(), ownerID);
     }
 
-    public String getWaypointName() {
-        return waypointName;
-    }
-
-    @Override
-    public void saveWaypoint() {
-
-    }
 
     @Override
     public String toString() {
