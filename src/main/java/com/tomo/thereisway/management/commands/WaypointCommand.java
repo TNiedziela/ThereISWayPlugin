@@ -24,7 +24,7 @@ public class WaypointCommand implements CommandExecutor {
         this.plugin = plugin;
         this.waypointManagementService = new WaypointManagementService(plugin);
         PluginCommand command = Objects.requireNonNull(plugin.getCommand("waypoint"));
-        command.setTabCompleter(new WaypointCommandTabCompleter());
+        command.setTabCompleter(new WaypointCommandTabCompleter(waypointManagementService));
         command.setExecutor(this);
     }
 

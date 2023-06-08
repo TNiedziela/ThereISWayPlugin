@@ -1,6 +1,8 @@
 package com.tomo.thereisway.management.utilities;
 
 import com.tomo.thereisway.management.commands.WaypointCommand;
+import com.tomo.thereisway.management.waypoints.WaypointManagementService;
+import com.tomo.thereisway.waypoints.PlayerWaypoint;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -14,15 +16,21 @@ import java.util.List;
 
 public class WaypointCommandTabCompleter implements TabCompleter {
 
-    public WaypointCommandTabCompleter() {}
+    private final WaypointManagementService waypointManagementService;
+
+    public WaypointCommandTabCompleter(WaypointManagementService waypointManagementService) {
+        this.waypointManagementService = waypointManagementService;
+    }
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         List<String> commandParams = List.of(args);
-        if (commandParams.size() != 1) {
-            return Collections.emptyList();
+        if (commandParams.size() == 1) {
+            return getCommandsThatStartWith(commandParams.get(0));
+        } else if (commandParams.size() == 2 && commandParams.get(0).equals(WaypointCommand.WaypointCommandType.MOVE.getCmd())) {
+            return getWaypointsThatNameStartWith((Player) sender, commandParams.get(1));
         }
-        return getCommandsThatStartWith(commandParams.get(0));
+        return Collections.emptyList();
     }
 
     private List<String> getCommandsThatStartWith(String firstLetters) {
@@ -33,5 +41,15 @@ public class WaypointCommandTabCompleter implements TabCompleter {
             }
         }
         return commandsToComplete;
+    }
+
+    private List<String> getWaypointsThatNameStartWith(Player player, String firstLetters) {
+        List<String> names = new ArrayList<>();
+        for (PlayerWaypoint waypoint : waypointManagementService.getWaypointsOwnedByPlayer(player)) {
+            if (waypoint.getWaypointName().startsWith(firstLetters)) {
+                names.add(waypoint.getWaypointName());
+            }
+        }
+        return names;
     }
 }
