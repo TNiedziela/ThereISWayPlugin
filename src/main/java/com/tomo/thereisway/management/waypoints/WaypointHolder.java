@@ -47,8 +47,7 @@ public class WaypointHolder implements Serializable {
             in.close();
             return waypointHolder;
         } catch (ClassNotFoundException | IOException e) {
-            e.printStackTrace();
-            return new WaypointHolder();
+            throw new RuntimeException(e);
         }
     }
 

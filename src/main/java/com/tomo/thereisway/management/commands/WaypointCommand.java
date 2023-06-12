@@ -81,7 +81,8 @@ public class WaypointCommand implements CommandExecutor {
         applyTeleportEffectOnPlayer(player);
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> player.teleport(waypoint.getPlacement()), moveDurationInTicks);
         Bukkit.getScheduler().runTaskLater(this.plugin, () -> player
-                        .playSound(Sound.sound(org.bukkit.Sound.ENTITY_ENDERMAN_TELEPORT.key(), Sound.Source.PLAYER, 1f, 1f)), moveDurationInTicks);
+                        .playSound(Sound.sound(org.bukkit.Sound.ENTITY_ENDERMAN_TELEPORT.key(),
+                                Sound.Source.PLAYER, 1f, 1f)), moveDurationInTicks);
         Bukkit.getScheduler().runTaskLater(this.plugin,
                 () -> player.sendMessage(ChatUtils.asGreenMessage("Successfully moved to: " + waypoint.getWaypointName())), moveDurationInTicks);
     }

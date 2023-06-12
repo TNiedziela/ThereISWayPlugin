@@ -19,7 +19,11 @@ public final class ThereISWay extends JavaPlugin {
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(new WpListener(this), this);
-        waypointHolder = WaypointHolder.loadData(WAYPOINTS_FILE);
+        try {
+            waypointHolder = WaypointHolder.loadData(WAYPOINTS_FILE);
+        } catch (RuntimeException exception) {
+            getLogger().warning("There was a problem while loading waypoint data\n" + exception.getMessage());
+        }
         new WaypointCommand(this);
         getLogger().info("There Is Way plugin has been enabled");
     }
