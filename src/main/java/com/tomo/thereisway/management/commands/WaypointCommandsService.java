@@ -20,12 +20,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class WaypointCommand implements CommandExecutor {
+public class WaypointCommandsService implements CommandExecutor {
     private final ThereISWay plugin;
 
     private final WaypointManagementService waypointManagementService;
 
-    public WaypointCommand(ThereISWay plugin) {
+    public WaypointCommandsService(ThereISWay plugin) {
         this.plugin = plugin;
         this.waypointManagementService = new WaypointManagementService(plugin);
         PluginCommand command = Objects.requireNonNull(plugin.getCommand("waypoint"));

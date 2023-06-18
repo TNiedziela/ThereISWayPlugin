@@ -1,6 +1,6 @@
 package com.tomo.thereisway;
 
-import com.tomo.thereisway.management.commands.WaypointCommand;
+import com.tomo.thereisway.management.commands.WaypointCommandsService;
 import com.tomo.thereisway.management.listeners.WpListener;
 import com.tomo.thereisway.management.waypoints.WaypointHolder;
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
@@ -24,7 +24,7 @@ public final class ThereISWay extends JavaPlugin {
         } catch (RuntimeException exception) {
             getLogger().warning("There was a problem while loading waypoint data\n" + exception.getMessage());
         }
-        new WaypointCommand(this);
+        new WaypointCommandsService(this);
         getLogger().info("There Is Way plugin has been enabled");
     }
 

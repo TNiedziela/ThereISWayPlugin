@@ -4,7 +4,10 @@ import com.tomo.thereisway.ThereISWay;
 import com.tomo.thereisway.management.events.WaypointModifiedEvent;
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
 import com.tomo.thereisway.waypoints.ServerWaypoint;
+import com.tomo.thereisway.waypoints.Waypoint;
 import org.bukkit.Location;
+import org.bukkit.entity.EnderCrystal;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -28,6 +31,7 @@ public class WaypointManagementService {
         }
         Location playerLocation = player.getLocation();
         PlayerWaypoint newPlayerWaypoint = PlayerWaypoint.createWaypoint(playerLocation, player, waypointName);
+        spawnEnderCrystalOnWaypoint(newPlayerWaypoint);
         player.sendMessage("Created new waypoint at: " + newPlayerWaypoint.getLocation());
         plugin.addPlayerWaypoint(newPlayerWaypoint);
 
@@ -86,6 +90,14 @@ public class WaypointManagementService {
         return plugin.getPlayerWaypoints().stream()
                 .filter(waypoint -> waypoint.isOwnedByPlayer(player))
                 .toList();
+    }
+
+    private void spawnEnderCrystalOnWaypoint(Waypoint waypoint) {
+        Location waypointPlacement = waypoint.getPlacement();
+        EnderCrystal crystal = (EnderCrystal) waypointPlacement.getWorld().spawnEntity(waypointPlacement, EntityType.ENDER_CRYSTAL);
+        crystal.getLocation().add(0,2,0);
+        crystal.setShowingBottom(false);
+        crystal.setBeamTarget(waypointPlacement);
     }
 
 }
