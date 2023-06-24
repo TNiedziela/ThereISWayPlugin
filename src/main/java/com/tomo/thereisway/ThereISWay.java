@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 public final class ThereISWay extends JavaPlugin {
 
@@ -23,6 +24,7 @@ public final class ThereISWay extends JavaPlugin {
             waypointHolder = WaypointHolder.loadData(WAYPOINTS_FILE);
         } catch (RuntimeException exception) {
             getLogger().warning("There was a problem while loading waypoint data\n" + exception.getMessage());
+            waypointHolder = new WaypointHolder();
         }
         new WaypointCommandsService(this);
         getLogger().info("There Is Way plugin has been enabled");
@@ -35,7 +37,7 @@ public final class ThereISWay extends JavaPlugin {
 
     public void saveWaypoints() {
         waypointHolder.saveData(WAYPOINTS_FILE);
-        System.out.println("Waypoint config saved");
+        getLogger().info("Waypoint config saved");
     }
 
     public void addPlayerWaypoint(PlayerWaypoint playerWaypoint) {

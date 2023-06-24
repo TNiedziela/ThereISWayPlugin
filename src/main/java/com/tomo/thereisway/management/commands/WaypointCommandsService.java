@@ -56,6 +56,8 @@ public class WaypointCommandsService implements CommandExecutor {
         Map<WaypointCommandType, Runnable> commands = new HashMap<>();
         commands.put(WaypointCommandType.CREATE, () -> waypointManagementService.createPlayerWaypoint(player, waypointName));
         commands.put(WaypointCommandType.DELETE, () -> waypointManagementService.deletePlayerWaypoint(player, waypointName));
+        commands.put(WaypointCommandType.EDIT, () -> spawnCrystalOnWaypoint(player, waypointName));
+        commands.put(WaypointCommandType.REMOVE_CRYSTAL, () -> removeCrystalFromWaypoint(player, waypointName));
         commands.put(WaypointCommandType.MOVE, () -> movePlayerToPlayerWaypointIfPossible(player, waypointName));
         commands.put(WaypointCommandType.SHOW, () -> showPlayerHisWaypoints(player));
         commands.put(WaypointCommandType.SHOW_ALL, () -> showAllWaypoints(player));
@@ -115,8 +117,38 @@ public class WaypointCommandsService implements CommandExecutor {
         return false;
     }
 
+    private void turnWaypointEffectOn(Player player, String waypointName) {
+        spawnCrystalOnWaypoint(player, waypointName);
+    }
+
     private void wrongCommandProvidedMessage(Player player) {
         player.sendMessage(ChatUtils.asRedMessage("Wrong command provided!\n"));
+    }
+
+    private void spawnCrystalOnWaypoint(Player player, String waypointName) {
+        if (waypointNameNotProvided(player, waypointName)) {
+            return;
+        }
+        Optional<PlayerWaypoint> playerWaypoint = waypointManagementService.getPlayerWaypointByNameIfExists(player, waypointName);
+        if (playerWaypoint.isEmpty()) {
+            player.sendMessage("You don't have waypoint with such name (" + waypointName + ")");
+        } else {
+            PlayerWaypoint waypoint = playerWaypoint.get();
+            waypointManagementService.spawnEnderCrystalOnWaypoint(waypoint);
+        }
+    }
+
+    private void removeCrystalFromWaypoint(Player player, String waypointName) {
+        if (waypointNameNotProvided(player, waypointName)) {
+            return;
+        }
+        Optional<PlayerWaypoint> playerWaypoint = waypointManagementService.getPlayerWaypointByNameIfExists(player, waypointName);
+        if (playerWaypoint.isEmpty()) {
+            player.sendMessage("You don't have waypoint with such name (" + waypointName + ")");
+        } else {
+            PlayerWaypoint waypoint = playerWaypoint.get();
+            waypointManagementService.despawnEnderCrystalFromWaypoint(waypoint);
+        }
     }
 
 
@@ -142,6 +174,8 @@ public class WaypointCommandsService implements CommandExecutor {
 
     public enum WaypointCommandType {
         CREATE("create"),
+        EDIT("edit"), //todo whole interface to edit waypoints needs to be created in the future
+        REMOVE_CRYSTAL("removeCrystal"),
         DELETE("delete"),
         MOVE("move"),
         SHOW("show"),
