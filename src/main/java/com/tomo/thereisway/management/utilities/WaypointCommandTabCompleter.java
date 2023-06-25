@@ -27,23 +27,16 @@ public class WaypointCommandTabCompleter implements TabCompleter {
         List<String> commandParams = List.of(args);
         if (commandParams.size() == 1) {
             return getCommandsThatStartWith(commandParams.get(0));
-        } else if (commandParams.size() == 2 && isMoveCommand(commandParams.get(0))) {
-
-            return getWaypointsThatNameStartWith((Player) sender, commandParams.get(1));
-
-        } else if (commandParams.size() == 2 && isDeleteCommand(commandParams.get(0))) {
-
+        } else if (commandParams.size() == 2 && isCommandForName(commandParams.get(0)) ) {
             return getWaypointsThatNameStartWith((Player) sender, commandParams.get(1));
         }
         return Collections.emptyList();
     }
 
-    private boolean isMoveCommand(String command) {
-        return command.equals(WaypointCommandsService.WaypointCommandType.MOVE.getCmd());
-    }
-
-    private boolean isDeleteCommand(String command) {
-        return command.equals(WaypointCommandsService.WaypointCommandType.DELETE.getCmd());
+    private boolean isCommandForName(String command) {
+        return command.equals(WaypointCommandsService.WaypointCommandType.MOVE.getCmd())
+                || command.equals(WaypointCommandsService.WaypointCommandType.DELETE.getCmd())
+                || command.equals(WaypointCommandsService.WaypointCommandType.EDIT.getCmd());
     }
 
     private List<String> getCommandsThatStartWith(String firstLetters) {

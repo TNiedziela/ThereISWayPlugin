@@ -7,8 +7,6 @@ import com.tomo.thereisway.waypoints.ServerWaypoint;
 import com.tomo.thereisway.waypoints.Waypoint;
 import com.tomo.thereisway.waypoints.WaypointEffect;
 import org.bukkit.Location;
-import org.bukkit.entity.EnderCrystal;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -39,7 +37,7 @@ public class WaypointManagementService {
         player.sendMessage("Created new waypoint at: " + newPlayerWaypoint.getLocation());
         plugin.addPlayerWaypoint(newPlayerWaypoint);
 
-        WaypointModifiedEvent event = WaypointModifiedEvent.waypointCreatedEvent(newPlayerWaypoint);
+        WaypointModifiedEvent event = WaypointModifiedEvent.waypointCreatedEvent(newPlayerWaypoint, player);
         event.callEvent();
     }
 
@@ -55,7 +53,7 @@ public class WaypointManagementService {
             return;
         }
         plugin.deletePlayerWaypoint(player, waypointName);
-        WaypointModifiedEvent event = WaypointModifiedEvent.waypointDeletedEvent(desiredWaypoint.get());
+        WaypointModifiedEvent event = WaypointModifiedEvent.waypointDeletedEvent(desiredWaypoint.get(), player);
         event.callEvent();
     }
 
@@ -66,7 +64,7 @@ public class WaypointManagementService {
         player.sendMessage("Created new server waypoint at: " + newServerWaypoint.getLocation());
         plugin.addServerWaypoint(newServerWaypoint);
 
-        WaypointModifiedEvent event = WaypointModifiedEvent.waypointCreatedEvent(newServerWaypoint);
+        WaypointModifiedEvent event = WaypointModifiedEvent.waypointCreatedEvent(newServerWaypoint, player);
         event.callEvent();
     }
 
@@ -98,15 +96,11 @@ public class WaypointManagementService {
 
     public void spawnEnderCrystalOnWaypoint(Waypoint waypoint) {
         waypoint.turnEffectOn(WaypointEffect.ENDER_CRYSTAL);
-        WaypointModifiedEvent event = WaypointModifiedEvent.waypointEffectTurnedOnEvent(waypoint);
-        event.callEvent();
         logger.info("Spawned ender crystal entity on waypoint " + waypoint.getWaypointName());
     }
 
     public void despawnEnderCrystalFromWaypoint(Waypoint waypoint) {
         waypoint.turnEffectOff(WaypointEffect.ENDER_CRYSTAL);
-        WaypointModifiedEvent event = WaypointModifiedEvent.waypointEffectTurnedOffEvent(waypoint);
-        event.callEvent();
         logger.info("Spawned ender crystal entity on waypoint " + waypoint.getWaypointName());
     }
 
