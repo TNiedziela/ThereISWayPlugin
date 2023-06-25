@@ -55,4 +55,17 @@ public class PlayerWaypoint extends Waypoint{
                 .clickEvent(ClickEvent.runCommand("/waypoint move " + waypointName));
         return message.append(clickable);
     }
+
+    @Override
+    public WaypointPOJO toWaypointPOJO() {
+        return new WaypointPOJO(waypointName,
+                placement.getWorld().getUID().toString(),
+                placement.getBlockX(),
+                placement.getBlockY(),
+                placement.getBlockZ(),
+                isEffectOn(WaypointEffect.ENDER_CRYSTAL),
+                crystalNameShow,
+                true,
+                ownerID.toString());
+    }
 }

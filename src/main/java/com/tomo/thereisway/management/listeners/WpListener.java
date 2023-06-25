@@ -2,6 +2,7 @@ package com.tomo.thereisway.management.listeners;
 
 import com.tomo.thereisway.ThereISWay;
 import com.tomo.thereisway.management.events.WaypointModifiedEvent;
+import com.tomo.thereisway.management.utilities.EditWaypointGui;
 import com.tomo.thereisway.management.waypoints.WaypointManagementService;
 import com.tomo.thereisway.waypoints.Waypoint;
 import com.tomo.thereisway.waypoints.WaypointEffect;
