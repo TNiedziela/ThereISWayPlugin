@@ -4,11 +4,14 @@ import com.tomo.thereisway.ThereISWay;
 import com.tomo.thereisway.management.events.WaypointModifiedEvent;
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
 import com.tomo.thereisway.waypoints.ServerWaypoint;
+import com.tomo.thereisway.waypoints.Waypoint;
+import com.tomo.thereisway.waypoints.WaypointEffect;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 /**
  * Service provides tools to manage creating, deleting and editing waypoints.
@@ -17,8 +20,11 @@ import java.util.Optional;
 public class WaypointManagementService {
     private final ThereISWay plugin;
 
+    private final Logger logger;
+
     public WaypointManagementService(ThereISWay plugin) {
         this.plugin = plugin;
+        this.logger = this.plugin.getLogger();
     }
 
     public void createPlayerWaypoint(Player player, String waypointName) {
@@ -31,7 +37,7 @@ public class WaypointManagementService {
         player.sendMessage("Created new waypoint at: " + newPlayerWaypoint.getLocation());
         plugin.addPlayerWaypoint(newPlayerWaypoint);
 
-        WaypointModifiedEvent event = new WaypointModifiedEvent(newPlayerWaypoint);
+        WaypointModifiedEvent event = WaypointModifiedEvent.waypointCreatedEvent(newPlayerWaypoint, player);
         event.callEvent();
     }
 
@@ -47,7 +53,7 @@ public class WaypointManagementService {
             return;
         }
         plugin.deletePlayerWaypoint(player, waypointName);
-        WaypointModifiedEvent event = new WaypointModifiedEvent(desiredWaypoint.get());
+        WaypointModifiedEvent event = WaypointModifiedEvent.waypointDeletedEvent(desiredWaypoint.get(), player);
         event.callEvent();
     }
 
@@ -58,7 +64,7 @@ public class WaypointManagementService {
         player.sendMessage("Created new server waypoint at: " + newServerWaypoint.getLocation());
         plugin.addServerWaypoint(newServerWaypoint);
 
-        WaypointModifiedEvent event = new WaypointModifiedEvent(newServerWaypoint);
+        WaypointModifiedEvent event = WaypointModifiedEvent.waypointCreatedEvent(newServerWaypoint, player);
         event.callEvent();
     }
 
@@ -86,6 +92,16 @@ public class WaypointManagementService {
         return plugin.getPlayerWaypoints().stream()
                 .filter(waypoint -> waypoint.isOwnedByPlayer(player))
                 .toList();
+    }
+
+    public void spawnEnderCrystalOnWaypoint(Waypoint waypoint) {
+        waypoint.turnEffectOn(WaypointEffect.ENDER_CRYSTAL);
+        logger.info("Spawned ender crystal entity on waypoint " + waypoint.getWaypointName());
+    }
+
+    public void despawnEnderCrystalFromWaypoint(Waypoint waypoint) {
+        waypoint.turnEffectOff(WaypointEffect.ENDER_CRYSTAL);
+        logger.info("Spawned ender crystal entity on waypoint " + waypoint.getWaypointName());
     }
 
 }

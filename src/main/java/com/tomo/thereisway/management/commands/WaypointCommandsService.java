@@ -1,6 +1,7 @@
 package com.tomo.thereisway.management.commands;
 
 import com.tomo.thereisway.ThereISWay;
+import com.tomo.thereisway.management.events.WaypointModifiedEvent;
 import com.tomo.thereisway.management.utilities.ChatUtils;
 import com.tomo.thereisway.management.utilities.WaypointCommandTabCompleter;
 import com.tomo.thereisway.management.waypoints.WaypointManagementService;
@@ -20,12 +21,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class WaypointCommand implements CommandExecutor {
+public class WaypointCommandsService implements CommandExecutor {
     private final ThereISWay plugin;
 
     private final WaypointManagementService waypointManagementService;
 
-    public WaypointCommand(ThereISWay plugin) {
+    public WaypointCommandsService(ThereISWay plugin) {
         this.plugin = plugin;
         this.waypointManagementService = new WaypointManagementService(plugin);
         PluginCommand command = Objects.requireNonNull(plugin.getCommand("waypoint"));
@@ -56,6 +57,7 @@ public class WaypointCommand implements CommandExecutor {
         Map<WaypointCommandType, Runnable> commands = new HashMap<>();
         commands.put(WaypointCommandType.CREATE, () -> waypointManagementService.createPlayerWaypoint(player, waypointName));
         commands.put(WaypointCommandType.DELETE, () -> waypointManagementService.deletePlayerWaypoint(player, waypointName));
+        commands.put(WaypointCommandType.EDIT, () -> openEditGui(player, waypointName));
         commands.put(WaypointCommandType.MOVE, () -> movePlayerToPlayerWaypointIfPossible(player, waypointName));
         commands.put(WaypointCommandType.SHOW, () -> showPlayerHisWaypoints(player));
         commands.put(WaypointCommandType.SHOW_ALL, () -> showAllWaypoints(player));
@@ -119,6 +121,20 @@ public class WaypointCommand implements CommandExecutor {
         player.sendMessage(ChatUtils.asRedMessage("Wrong command provided!\n"));
     }
 
+    private void openEditGui(Player player, String waypointName) {
+        if (waypointNameNotProvided(player, waypointName)) {
+            return;
+        }
+        Optional<PlayerWaypoint> playerWaypoint = waypointManagementService.getPlayerWaypointByNameIfExists(player, waypointName);
+        if (playerWaypoint.isEmpty()) {
+            player.sendMessage("You don't have waypoint with such name (" + waypointName + ")");
+        } else {
+            PlayerWaypoint waypoint = playerWaypoint.get();
+            WaypointModifiedEvent event = WaypointModifiedEvent.waypointOpenEditEvent(waypoint, player);
+            event.callEvent();
+        }
+    }
+
 
     private void showPlayerHisWaypoints(Player player) {
         List<PlayerWaypoint> ownedByPlayerWaypoints = waypointManagementService.getWaypointsOwnedByPlayer(player);
@@ -142,6 +158,7 @@ public class WaypointCommand implements CommandExecutor {
 
     public enum WaypointCommandType {
         CREATE("create"),
+        EDIT("edit"),
         DELETE("delete"),
         MOVE("move"),
         SHOW("show"),

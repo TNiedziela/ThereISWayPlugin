@@ -1,6 +1,6 @@
 package com.tomo.thereisway.management.utilities;
 
-import com.tomo.thereisway.management.commands.WaypointCommand;
+import com.tomo.thereisway.management.commands.WaypointCommandsService;
 import com.tomo.thereisway.management.waypoints.WaypointManagementService;
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
 import org.bukkit.command.Command;
@@ -27,15 +27,21 @@ public class WaypointCommandTabCompleter implements TabCompleter {
         List<String> commandParams = List.of(args);
         if (commandParams.size() == 1) {
             return getCommandsThatStartWith(commandParams.get(0));
-        } else if (commandParams.size() == 2 && commandParams.get(0).equals(WaypointCommand.WaypointCommandType.MOVE.getCmd())) {
+        } else if (commandParams.size() == 2 && isCommandForName(commandParams.get(0)) ) {
             return getWaypointsThatNameStartWith((Player) sender, commandParams.get(1));
         }
         return Collections.emptyList();
     }
 
+    private boolean isCommandForName(String command) {
+        return command.equals(WaypointCommandsService.WaypointCommandType.MOVE.getCmd())
+                || command.equals(WaypointCommandsService.WaypointCommandType.DELETE.getCmd())
+                || command.equals(WaypointCommandsService.WaypointCommandType.EDIT.getCmd());
+    }
+
     private List<String> getCommandsThatStartWith(String firstLetters) {
         List<String> commandsToComplete = new ArrayList<>();
-        for (WaypointCommand.WaypointCommandType command : WaypointCommand.WaypointCommandType.values()) {
+        for (WaypointCommandsService.WaypointCommandType command : WaypointCommandsService.WaypointCommandType.values()) {
             if (command.getCmd().startsWith(firstLetters) && command.isProper()) {
                 commandsToComplete.add(command.getCmd());
             }

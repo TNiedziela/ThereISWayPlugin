@@ -3,6 +3,8 @@ package com.tomo.thereisway.management.waypoints;
 
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
 import com.tomo.thereisway.waypoints.ServerWaypoint;
+import com.tomo.thereisway.waypoints.Waypoint;
+import com.tomo.thereisway.waypoints.WaypointEffect;
 import org.bukkit.entity.Player;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
@@ -15,12 +17,12 @@ import java.util.zip.GZIPOutputStream;
 
 public class WaypointHolder implements Serializable {
 
-    private List<PlayerWaypoint> playerWaypoints = new ArrayList<>();
-    private List<ServerWaypoint> serverWaypoints = new ArrayList<>();
+    private final List<PlayerWaypoint> playerWaypoints = new ArrayList<>();
+    private final List<ServerWaypoint> serverWaypoints = new ArrayList<>();
 
     public WaypointHolder() {}
 
-    public boolean saveData(String filePath) {
+    public void saveData(String filePath) {
         try {
             File file = new File(filePath);
             if (!file.exists()) {
@@ -29,10 +31,8 @@ public class WaypointHolder implements Serializable {
             BukkitObjectOutputStream out = new BukkitObjectOutputStream(new GZIPOutputStream(new FileOutputStream(filePath)));
             out.writeObject(this);
             out.close();
-            return true;
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
     }
 
@@ -45,6 +45,16 @@ public class WaypointHolder implements Serializable {
             BukkitObjectInputStream in = new BukkitObjectInputStream(new GZIPInputStream(new FileInputStream(filePath)));
             WaypointHolder waypointHolder = (WaypointHolder) in.readObject();
             in.close();
+            for (Waypoint waypoint : waypointHolder.playerWaypoints) {
+                if (waypoint.isEffectOn(WaypointEffect.ENDER_CRYSTAL)) {
+                    waypoint.spawnEnderCrystal();
+                }
+            }
+            for (Waypoint waypoint : waypointHolder.serverWaypoints) {
+                if (waypoint.isEffectOn(WaypointEffect.ENDER_CRYSTAL)) {
+                    waypoint.spawnEnderCrystal();
+                }
+            }
             return waypointHolder;
         } catch (ClassNotFoundException | IOException e) {
             throw new RuntimeException(e);
