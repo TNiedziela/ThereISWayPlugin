@@ -16,15 +16,15 @@ public class PlayerWaypoint extends Waypoint{
 
     private final UUID ownerID;
 
-    public PlayerWaypoint(Location placement, Player owner, String waypointName) {
+    public PlayerWaypoint(Location placement, String ownerID, String waypointName) {
         super();
         super.waypointName = waypointName;
         super.placement = placement;
-        this.ownerID = owner.getPlayerProfile().getId();
+        this.ownerID = UUID.fromString(ownerID);
     }
 
-    public static PlayerWaypoint createWaypoint(Location waypointLocation,Player player, String waypointName) {
-        return new PlayerWaypoint(waypointLocation, player, waypointName);
+    public static PlayerWaypoint createWaypoint(Location waypointLocation,String playerUUID, String waypointName) {
+        return new PlayerWaypoint(waypointLocation, playerUUID, waypointName);
     }
 
     public boolean isOwnedByPlayer(Player player) {
@@ -54,5 +54,18 @@ public class PlayerWaypoint extends Waypoint{
         TextComponent clickable = Component.text(ChatUtils.coloredMessage(" [Click here to teleport]", ChatColor.GOLD))
                 .clickEvent(ClickEvent.runCommand("/waypoint move " + waypointName));
         return message.append(clickable);
+    }
+
+    @Override
+    public WaypointPOJO toWaypointPOJO() {
+        return new WaypointPOJO(waypointName,
+                placement.getWorld().getUID().toString(),
+                placement.getBlockX(),
+                placement.getBlockY(),
+                placement.getBlockZ(),
+                isEffectOn(WaypointEffect.ENDER_CRYSTAL),
+                crystalNameShow,
+                true,
+                ownerID.toString());
     }
 }

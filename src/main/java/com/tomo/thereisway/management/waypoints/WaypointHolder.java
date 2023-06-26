@@ -1,17 +1,18 @@
 package com.tomo.thereisway.management.waypoints;
 
 
-import com.tomo.thereisway.waypoints.PlayerWaypoint;
-import com.tomo.thereisway.waypoints.ServerWaypoint;
-import com.tomo.thereisway.waypoints.Waypoint;
-import com.tomo.thereisway.waypoints.WaypointEffect;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.tomo.thereisway.waypoints.*;
 import org.bukkit.entity.Player;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -58,6 +59,71 @@ public class WaypointHolder implements Serializable {
             return waypointHolder;
         } catch (ClassNotFoundException | IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void saveDataToJson(String filePath) {
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            Writer writer = new FileWriter(file);
+
+            List<WaypointPOJO> waypointPOJO = playerWaypoints.stream().map(PlayerWaypoint::toWaypointPOJO).collect(Collectors.toList());
+            waypointPOJO.addAll(serverWaypoints.stream().map(ServerWaypoint::toWaypointPOJO).toList());
+
+            WaypointPOJO[] waypointsArr = waypointPOJO.toArray(WaypointPOJO[]::new);
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(waypointsArr, writer);
+
+            writer.flush();
+            writer.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+        public static WaypointHolder loadDataFromJson(String filePath) {
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                return new WaypointHolder();
+            }
+            Reader reader = new FileReader(file);
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            List<WaypointPOJO> waypoints = Arrays.stream(gson.fromJson(reader, WaypointPOJO[].class)).toList();
+
+            WaypointHolder waypointHolder = new WaypointHolder();
+            waypoints.forEach(waypoint -> waypointHolder.addWaypoint(waypoint.toWaypoint()));
+
+            for (Waypoint waypoint : waypointHolder.playerWaypoints) {
+                if (waypoint.isEffectOn(WaypointEffect.ENDER_CRYSTAL)) {
+                    waypoint.spawnEnderCrystal();
+                }
+            }
+            for (Waypoint waypoint : waypointHolder.serverWaypoints) {
+                if (waypoint.isEffectOn(WaypointEffect.ENDER_CRYSTAL)) {
+                    waypoint.spawnEnderCrystal();
+                }
+            }
+            reader.close();
+            return waypointHolder;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void addWaypoint(Waypoint waypoint) {
+        if (waypoint instanceof PlayerWaypoint) {
+            playerWaypoints.add((PlayerWaypoint) waypoint);
+        }
+        if (waypoint instanceof ServerWaypoint) {
+            serverWaypoints.add((ServerWaypoint) waypoint);
         }
     }
 

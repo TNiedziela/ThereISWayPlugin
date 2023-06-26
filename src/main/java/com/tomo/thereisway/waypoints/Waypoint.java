@@ -14,7 +14,6 @@ public abstract class Waypoint implements Serializable {
 
     protected String waypointName;
     protected Location placement;
-
     protected boolean crystalNameShow = false;
 
     protected Map<WaypointEffect, Boolean> effects = WaypointEffect.getDefaultEffectsMap();
@@ -113,5 +112,17 @@ public abstract class Waypoint implements Serializable {
         relatedEntities.remove(WaypointEffect.ENDER_CRYSTAL);
         placement.getWorld().getEntities()
                 .removeIf(entity -> entity.getUniqueId().equals(entityID));
+    }
+
+    public WaypointPOJO toWaypointPOJO() {
+        return new WaypointPOJO(waypointName,
+                placement.getWorld().getUID().toString(),
+                placement.getBlockX(),
+                placement.getBlockY(),
+                placement.getBlockZ(),
+                isEffectOn(WaypointEffect.ENDER_CRYSTAL),
+                crystalNameShow,
+                false,
+                "");
     }
 }

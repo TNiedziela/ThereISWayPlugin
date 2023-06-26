@@ -1,4 +1,4 @@
-package com.tomo.thereisway.management.listeners;
+package com.tomo.thereisway.management.utilities;
 
 import com.tomo.thereisway.management.utilities.ChatUtils;
 import com.tomo.thereisway.waypoints.Waypoint;
