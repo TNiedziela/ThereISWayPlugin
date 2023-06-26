@@ -33,7 +33,7 @@ public class WaypointManagementService {
             return;
         }
         Location playerLocation = player.getLocation();
-        PlayerWaypoint newPlayerWaypoint = PlayerWaypoint.createWaypoint(playerLocation, player, waypointName);
+        PlayerWaypoint newPlayerWaypoint = PlayerWaypoint.createWaypoint(playerLocation, player.getUniqueId().toString(), waypointName);
         player.sendMessage("Created new waypoint at: " + newPlayerWaypoint.getLocation());
         plugin.addPlayerWaypoint(newPlayerWaypoint);
 

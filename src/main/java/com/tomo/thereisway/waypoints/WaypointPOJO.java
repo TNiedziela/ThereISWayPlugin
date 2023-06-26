@@ -11,14 +11,14 @@ import java.util.UUID;
 public class WaypointPOJO {
 
 
-    private String waypointName;
-    private String worldUUID;
-    private double x;
-    private double y;
-    private double z;
-    private boolean endCrystalShow = false;
-    private boolean crystalNameShow = false;
-    private boolean isPlayerWaypoint = true;
+    private final String waypointName;
+    private final String worldUUID;
+    private final double x;
+    private final double y;
+    private final double z;
+    private final boolean endCrystalShow;
+    private final boolean crystalNameShow;
+    private final boolean isPlayerWaypoint;
     private String playerUUID = "";
 
     public WaypointPOJO(String waypointName, String worldUUID, double x, double y, double z, boolean endCrystalShow, boolean crystalNameShow, boolean isPlayerWaypoint, String playerUUID) {
@@ -35,15 +35,15 @@ public class WaypointPOJO {
 
     public Waypoint toWaypoint() {
         if (isPlayerWaypoint) {
-            return createPlayerWaypoint(Bukkit.getServer().getPlayer(UUID.fromString(playerUUID)));
+            return createPlayerWaypoint(playerUUID);
         }
-        return createPlayerWaypoint();
+        return createServerWaypoint();
     }
 
-    private PlayerWaypoint createPlayerWaypoint(Player player) {
+    private PlayerWaypoint createPlayerWaypoint(String playerUUID) {
         World world = Bukkit.getServer().getWorld(UUID.fromString(worldUUID));
         Location location = new Location(world, x, y, z);
-        PlayerWaypoint newPlayerWaypoint = PlayerWaypoint.createWaypoint(location, player, waypointName);
+        PlayerWaypoint newPlayerWaypoint = PlayerWaypoint.createWaypoint(location, playerUUID, waypointName);
         if (crystalNameShow) {
             newPlayerWaypoint.setCrystalNameVisible();
         }
@@ -53,7 +53,7 @@ public class WaypointPOJO {
         return newPlayerWaypoint;
     }
 
-    private ServerWaypoint createPlayerWaypoint() {
+    private ServerWaypoint createServerWaypoint() {
         World world = Bukkit.getServer().getWorld(UUID.fromString(worldUUID));
         Location location = new Location(world, x, y, z);
         ServerWaypoint newServerWaypoint = ServerWaypoint.createWaypoint(location, waypointName);

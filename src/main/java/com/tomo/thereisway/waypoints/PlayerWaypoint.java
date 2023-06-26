@@ -16,15 +16,15 @@ public class PlayerWaypoint extends Waypoint{
 
     private final UUID ownerID;
 
-    public PlayerWaypoint(Location placement, Player owner, String waypointName) {
+    public PlayerWaypoint(Location placement, String ownerID, String waypointName) {
         super();
         super.waypointName = waypointName;
         super.placement = placement;
-        this.ownerID = owner.getPlayerProfile().getId();
+        this.ownerID = UUID.fromString(ownerID);
     }
 
-    public static PlayerWaypoint createWaypoint(Location waypointLocation,Player player, String waypointName) {
-        return new PlayerWaypoint(waypointLocation, player, waypointName);
+    public static PlayerWaypoint createWaypoint(Location waypointLocation,String playerUUID, String waypointName) {
+        return new PlayerWaypoint(waypointLocation, playerUUID, waypointName);
     }
 
     public boolean isOwnedByPlayer(Player player) {
