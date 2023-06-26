@@ -2,6 +2,7 @@ package com.tomo.thereisway.management.waypoints;
 
 import com.tomo.thereisway.ThereISWay;
 import com.tomo.thereisway.management.events.WaypointModifiedEvent;
+import com.tomo.thereisway.management.utilities.ChatUtils;
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
 import com.tomo.thereisway.waypoints.ServerWaypoint;
 import com.tomo.thereisway.waypoints.Waypoint;
@@ -29,7 +30,11 @@ public class WaypointManagementService {
 
     public void createPlayerWaypoint(Player player, String waypointName) {
         if (waypointName.isEmpty()) {
-            player.sendMessage("Waypoint name not provided. aborting waypoint creation.");
+            player.sendMessage(ChatUtils.asRedMessage("Waypoint name not provided. aborting waypoint creation."));
+            return;
+        }
+        if (getPlayerWaypointByNameIfExists(player, waypointName).isPresent()) {
+            player.sendMessage(ChatUtils.asRedMessage("You already own waypoint with such name."));
             return;
         }
         Location playerLocation = player.getLocation();
@@ -43,13 +48,12 @@ public class WaypointManagementService {
 
     public void deletePlayerWaypoint(Player player, String waypointName) {
         if (waypointName.isEmpty()) {
-            player.sendMessage("Waypoint name not provided. aborting waypoint deletion.");
+            player.sendMessage(ChatUtils.asRedMessage("Waypoint name not provided. aborting waypoint deletion."));
             return;
         }
-        List<PlayerWaypoint> playerWaypoints = getWaypointsOwnedByPlayer(player);
-        Optional<PlayerWaypoint> desiredWaypoint = playerWaypoints.stream().filter(wp -> wp.getWaypointName().equals(waypointName)).findFirst();
+        Optional<PlayerWaypoint> desiredWaypoint = getPlayerWaypointByNameIfExists(player, waypointName);
         if (desiredWaypoint.isEmpty()) {
-            player.sendMessage("You don't own waypoint with such name.");
+            player.sendMessage(ChatUtils.asRedMessage("You don't own waypoint with such name."));
             return;
         }
         plugin.deletePlayerWaypoint(player, waypointName);
@@ -57,8 +61,27 @@ public class WaypointManagementService {
         event.callEvent();
     }
 
+    public void deleteServerWaypoint(Player player, String waypointName) {
+        if (waypointName.isEmpty()) {
+            player.sendMessage(ChatUtils.asRedMessage("Waypoint name not provided. aborting waypoint deletion."));
+            return;
+        }
+        Optional<ServerWaypoint> desiredWaypoint = getServerWaypointByNameIfExists(waypointName);
+        if (desiredWaypoint.isEmpty()) {
+            player.sendMessage(ChatUtils.asRedMessage("There is no global waypoint with such name."));
+            return;
+        }
+        plugin.deleteServerWaypoint(waypointName);
+        WaypointModifiedEvent event = WaypointModifiedEvent.waypointDeletedEvent(desiredWaypoint.get(), player);
+        event.callEvent();
+    }
+
 
     public void createServerWaypoint(Player player, String waypointName) {
+        if (getServerWaypointByNameIfExists(waypointName).isPresent()) {
+            player.sendMessage(ChatUtils.asRedMessage("There is already global waypoint with such name."));
+            return;
+        }
         Location playerLocation = player.getLocation();
         ServerWaypoint newServerWaypoint = ServerWaypoint.createWaypoint(playerLocation, waypointName);
         player.sendMessage("Created new server waypoint at: " + newServerWaypoint.getLocation());

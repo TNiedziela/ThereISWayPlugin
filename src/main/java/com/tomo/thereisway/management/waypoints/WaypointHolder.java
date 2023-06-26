@@ -145,6 +145,15 @@ public class WaypointHolder implements Serializable {
         }
     }
 
+    public void deleteServerWaypoint(String waypointName) {
+        for (int i = 0; i < serverWaypoints.size(); i++) {
+            if (serverWaypoints.get(i).getWaypointName().equals(waypointName)) {
+                serverWaypoints.remove(i);
+                break;
+            }
+        }
+    }
+
     public List<PlayerWaypoint> getPlayerWaypoints() {
         return playerWaypoints;
     }

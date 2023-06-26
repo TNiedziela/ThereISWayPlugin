@@ -56,7 +56,9 @@ public class WaypointCommandsService implements CommandExecutor {
     private Map<WaypointCommandType, Runnable> getCommands(Player player, String waypointName) {
         Map<WaypointCommandType, Runnable> commands = new HashMap<>();
         commands.put(WaypointCommandType.CREATE, () -> waypointManagementService.createPlayerWaypoint(player, waypointName));
+        commands.put(WaypointCommandType.CREATE_SERVER, () -> waypointManagementService.createServerWaypoint(player, waypointName));
         commands.put(WaypointCommandType.DELETE, () -> waypointManagementService.deletePlayerWaypoint(player, waypointName));
+        commands.put(WaypointCommandType.DELETE_SERVER, () -> waypointManagementService.deleteServerWaypoint(player, waypointName));
         commands.put(WaypointCommandType.EDIT, () -> openEditGui(player, waypointName));
         commands.put(WaypointCommandType.MOVE, () -> movePlayerToPlayerWaypointIfPossible(player, waypointName));
         commands.put(WaypointCommandType.SHOW, () -> showPlayerHisWaypoints(player));
@@ -158,8 +160,10 @@ public class WaypointCommandsService implements CommandExecutor {
 
     public enum WaypointCommandType {
         CREATE("create"),
+        CREATE_SERVER("createGlobal"),
         EDIT("edit"),
         DELETE("delete"),
+        DELETE_SERVER("deleteGlobal"),
         MOVE("move"),
         SHOW("show"),
         SHOW_ALL("showAll"),

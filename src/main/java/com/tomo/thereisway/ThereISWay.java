@@ -52,6 +52,10 @@ public final class ThereISWay extends JavaPlugin {
         waypointHolder.deletePlayerWaypoint(player, waypointName);
     }
 
+    public void deleteServerWaypoint(String waypointName) {
+        waypointHolder.deleteServerWaypoint(waypointName);
+    }
+
     public List<PlayerWaypoint> getPlayerWaypoints() {
         return waypointHolder.getPlayerWaypoints();
     }
