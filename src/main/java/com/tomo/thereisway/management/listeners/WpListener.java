@@ -1,11 +1,13 @@
 package com.tomo.thereisway.management.listeners;
 
 import com.tomo.thereisway.ThereISWay;
-import com.tomo.thereisway.management.events.WaypointModifiedEvent;
-import com.tomo.thereisway.management.utilities.EditWaypointGui;
+import com.tomo.thereisway.management.events.WaypointRelatedEvent;
+import com.tomo.thereisway.management.utilities.ChatUtils;
+import com.tomo.thereisway.management.utilities.WaypointServiceGui;
 import com.tomo.thereisway.management.waypoints.WaypointManagementService;
 import com.tomo.thereisway.waypoints.Waypoint;
 import com.tomo.thereisway.waypoints.WaypointEffect;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,8 +24,10 @@ public class WpListener implements Listener {
 
     private static ThereISWay plugin;
 
-    private EditWaypointGui editWaypointGui;
+    private WaypointServiceGui waypointServiceGui;
     private final WaypointManagementService waypointManagementService;
+
+    private int page = 0;
 
     public WpListener(ThereISWay plugin) {
         WpListener.plugin = plugin;
@@ -40,20 +44,25 @@ public class WpListener implements Listener {
     }
 
     @EventHandler
-    public void onWaypointEvent(WaypointModifiedEvent event) {
-        if (event.getReason().equals(WaypointModifiedEvent.Reason.OPEN_EDIT)) {
-            editWaypointGui = new EditWaypointGui(event.getWaypoint());
-            editWaypointGui.openInventory(event.getTrigger());
-        } else if (event.getReason().equals(WaypointModifiedEvent.Reason.SAVE_EDIT)) {
-            editWaypointGui = null;
+    public void onWaypointEvent(WaypointRelatedEvent event) {
+        if (event.getReason().equals(WaypointRelatedEvent.Reason.OPEN_SERVICE)) {
+            waypointServiceGui = new WaypointServiceGui(plugin, event.getWaypoint())
+                    .loadServiceFirstStepItems();
+            waypointServiceGui.openInventory(event.getTrigger());
+        } else if (event.getReason().equals(WaypointRelatedEvent.Reason.OPEN_EDIT)) {
+            waypointServiceGui = new WaypointServiceGui(plugin, event.getWaypoint())
+                    .loadWaypointFirstStepItems();
+            waypointServiceGui.openInventory(event.getTrigger());
+        } else if (event.getReason().equals(WaypointRelatedEvent.Reason.SAVE_EDIT)) {
+            waypointServiceGui = null;
         }
         plugin.saveWaypoints();
     }
 
     @EventHandler
     public void onInventoryClick(final InventoryClickEvent e) {
-        if (Objects.isNull(editWaypointGui)) return;
-        if (!e.getInventory().equals(editWaypointGui.getGuiInventory())) return;
+        if (Objects.isNull(waypointServiceGui)) return;
+        if (!e.getInventory().equals(waypointServiceGui.getGuiInventory())) return;
 
         e.setCancelled(true);
 
@@ -63,44 +72,87 @@ public class WpListener implements Listener {
         final Player p = (Player) e.getWhoClicked();
 
         if (clickedItem.getType().equals(Material.END_CRYSTAL)) {
-            editWaypointGui.loadEndCrystalStepItems();
+            waypointServiceGui.loadEndCrystalStepItems();
+        }
+
+        if (clickedItem.getType().equals(Material.FILLED_MAP)) {
+            if (Objects.equals(clickedItem.getItemMeta().displayName(), Component.text(ChatUtils.asGoldMessage("Global waypoints")))) {
+                waypointServiceGui.loadServiceServerWaypointsListStepItems(page);
+            }
+            if (Objects.equals(clickedItem.getItemMeta().displayName(), Component.text(ChatUtils.asDarkPurpleMessage("Player waypoints")))) {
+                waypointServiceGui.loadServicePlayerWaypointsListStepItems((Player) e.getWhoClicked(), page);
+            }
+            waypointServiceGui.openInventory(e.getWhoClicked());
+        }
+
+        if (clickedItem.getType().equals(Material.ARROW)) {
+            if (Objects.equals(clickedItem.getItemMeta().displayName(), Component.text(ChatUtils.asBlueMessage("Next server waypoints")))) {
+                page++;
+                waypointServiceGui.loadServiceServerWaypointsListStepItems(page);
+            }
+            if (Objects.equals(clickedItem.getItemMeta().displayName(), Component.text(ChatUtils.asBlueMessage("Previous server waypoints")))) {
+                page--;
+                waypointServiceGui.loadServiceServerWaypointsListStepItems(page);
+            }
+
+            if (Objects.equals(clickedItem.getItemMeta().displayName(), Component.text(ChatUtils.asBlueMessage("Next player waypoints")))) {
+                page++;
+                waypointServiceGui.loadServicePlayerWaypointsListStepItems((Player) e.getWhoClicked(), page);
+            }
+            if (Objects.equals(clickedItem.getItemMeta().displayName(), Component.text(ChatUtils.asBlueMessage("Previous player waypoints")))) {
+                page--;
+                waypointServiceGui.loadServicePlayerWaypointsListStepItems((Player) e.getWhoClicked(),page);
+            }
+        }
+
+        if (clickedItem.getType().equals(Material.NETHER_STAR)) {
+            waypointServiceGui.withWaypoint(waypointManagementService.getPlayerWaypointByNameIfExists((Player) e.getWhoClicked(),
+                    clickedItem.getItemMeta().getDisplayName()).get());
+            waypointServiceGui.loadWaypointFirstStepItems();
+            waypointServiceGui.openInventory(e.getWhoClicked());
+        }
+        if (clickedItem.getType().equals(Material.AMETHYST_SHARD)) {
+            waypointServiceGui.withWaypoint(waypointManagementService.getServerWaypointByNameIfExists(clickedItem.getItemMeta().getDisplayName()).get());
+            waypointServiceGui.loadWaypointFirstStepItems();
+            waypointServiceGui.openInventory(e.getWhoClicked());
         }
 
         if (clickedItem.getType().equals(Material.ENDER_EYE)) {
-            Waypoint waypoint = editWaypointGui.getWaypoint();
+            Waypoint waypoint = waypointServiceGui.getWaypoint();
             if (!waypoint.isEffectOn(WaypointEffect.ENDER_CRYSTAL)) {
                 spawnCrystalOnWaypoint(waypoint);
             } else {
                 removeCrystalFromWaypoint(waypoint);
             }
-            editWaypointGui.loadEndCrystalStepItems();
+            waypointServiceGui.loadEndCrystalStepItems();
         }
 
         if (clickedItem.getType().equals(Material.NAME_TAG)) {
-            Waypoint waypoint = editWaypointGui.getWaypoint();
+            Waypoint waypoint = waypointServiceGui.getWaypoint();
             if (!waypoint.isCrystalNameVisible()) {
                 waypoint.setCrystalNameVisible();
             } else {
                 waypoint.setCrystalNameNotVisible();
             }
-            editWaypointGui.loadEndCrystalStepItems();
+            waypointServiceGui.loadEndCrystalStepItems();
         }
 
     }
 
     @EventHandler
     public void onInventoryClick(final InventoryDragEvent e) {
-        if (Objects.isNull(editWaypointGui)) return;
-        if (e.getInventory().equals(editWaypointGui.getGuiInventory())) {
+        if (Objects.isNull(waypointServiceGui)) return;
+        if (e.getInventory().equals(waypointServiceGui.getGuiInventory())) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onInventoryClose(final InventoryCloseEvent e) {
-        if (Objects.isNull(editWaypointGui)) return;
-        if (e.getInventory().equals(editWaypointGui.getGuiInventory())) {
-            WaypointModifiedEvent.waypointSaveEditEvent(editWaypointGui.getWaypoint(), (Player) e.getPlayer()).callEvent();
+        page = 0;
+        if (Objects.isNull(waypointServiceGui)) return;
+        if (e.getInventory().equals(waypointServiceGui.getGuiInventory())) {
+            WaypointRelatedEvent.waypointSaveEditEvent(waypointServiceGui.getWaypoint(), (Player) e.getPlayer()).callEvent();
         }
     }
 

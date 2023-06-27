@@ -1,7 +1,7 @@
 package com.tomo.thereisway.management.commands;
 
 import com.tomo.thereisway.ThereISWay;
-import com.tomo.thereisway.management.events.WaypointModifiedEvent;
+import com.tomo.thereisway.management.events.WaypointRelatedEvent;
 import com.tomo.thereisway.management.utilities.ChatUtils;
 import com.tomo.thereisway.management.utilities.WaypointCommandTabCompleter;
 import com.tomo.thereisway.management.waypoints.WaypointManagementService;
@@ -45,6 +45,10 @@ public class WaypointCommandsService implements CommandExecutor {
             player.sendMessage("You are not permitted to create waypoints!");
             return true;
         } else {
+            if (commandArgs.isEmpty()) {
+                openWaypointServiceGui(player);
+                return false;
+            }
             WaypointCommandType actualCommand = WaypointCommandType.get(commandArgs.get(0)).orElse(WaypointCommandType.WRONG);
             String waypointName = commandArgs.size() == 2 ? commandArgs.get(1) : "";
             Map<WaypointCommandType, Runnable> commands = getCommands(player, waypointName);
@@ -132,9 +136,14 @@ public class WaypointCommandsService implements CommandExecutor {
             player.sendMessage("You don't have waypoint with such name (" + waypointName + ")");
         } else {
             PlayerWaypoint waypoint = playerWaypoint.get();
-            WaypointModifiedEvent event = WaypointModifiedEvent.waypointOpenEditEvent(waypoint, player);
+            WaypointRelatedEvent event = WaypointRelatedEvent.waypointOpenEditEvent(waypoint, player);
             event.callEvent();
         }
+    }
+
+    private void openWaypointServiceGui(Player player) {
+        WaypointRelatedEvent event = WaypointRelatedEvent.waypointOpenServiceEvent(player);
+        event.callEvent();
     }
 
 

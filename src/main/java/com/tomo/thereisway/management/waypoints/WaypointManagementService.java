@@ -1,7 +1,7 @@
 package com.tomo.thereisway.management.waypoints;
 
 import com.tomo.thereisway.ThereISWay;
-import com.tomo.thereisway.management.events.WaypointModifiedEvent;
+import com.tomo.thereisway.management.events.WaypointRelatedEvent;
 import com.tomo.thereisway.management.utilities.ChatUtils;
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
 import com.tomo.thereisway.waypoints.ServerWaypoint;
@@ -42,7 +42,7 @@ public class WaypointManagementService {
         player.sendMessage("Created new waypoint at: " + newPlayerWaypoint.getLocation());
         plugin.addPlayerWaypoint(newPlayerWaypoint);
 
-        WaypointModifiedEvent event = WaypointModifiedEvent.waypointCreatedEvent(newPlayerWaypoint, player);
+        WaypointRelatedEvent event = WaypointRelatedEvent.waypointCreatedEvent(newPlayerWaypoint, player);
         event.callEvent();
     }
 
@@ -57,7 +57,7 @@ public class WaypointManagementService {
             return;
         }
         plugin.deletePlayerWaypoint(player, waypointName);
-        WaypointModifiedEvent event = WaypointModifiedEvent.waypointDeletedEvent(desiredWaypoint.get(), player);
+        WaypointRelatedEvent event = WaypointRelatedEvent.waypointDeletedEvent(desiredWaypoint.get(), player);
         event.callEvent();
     }
 
@@ -72,7 +72,7 @@ public class WaypointManagementService {
             return;
         }
         plugin.deleteServerWaypoint(waypointName);
-        WaypointModifiedEvent event = WaypointModifiedEvent.waypointDeletedEvent(desiredWaypoint.get(), player);
+        WaypointRelatedEvent event = WaypointRelatedEvent.waypointDeletedEvent(desiredWaypoint.get(), player);
         event.callEvent();
     }
 
@@ -87,7 +87,7 @@ public class WaypointManagementService {
         player.sendMessage("Created new server waypoint at: " + newServerWaypoint.getLocation());
         plugin.addServerWaypoint(newServerWaypoint);
 
-        WaypointModifiedEvent event = WaypointModifiedEvent.waypointCreatedEvent(newServerWaypoint, player);
+        WaypointRelatedEvent event = WaypointRelatedEvent.waypointCreatedEvent(newServerWaypoint, player);
         event.callEvent();
     }
 
