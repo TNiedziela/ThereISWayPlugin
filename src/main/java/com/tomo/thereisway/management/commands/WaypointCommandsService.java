@@ -71,7 +71,7 @@ public class WaypointCommandsService implements CommandExecutor {
         return commands;
     }
 
-    private void movePlayerToPlayerWaypointIfPossible(Player player, String waypointName) {
+    public void movePlayerToPlayerWaypointIfPossible(Player player, String waypointName) {
         if (waypointNameNotProvided(player, waypointName)) {
             return;
         }
@@ -101,7 +101,7 @@ public class WaypointCommandsService implements CommandExecutor {
         player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60, 100));
     }
 
-    private void movePlayerToServerWaypointIfPossible(Player player, String waypointName) {
+    public void movePlayerToServerWaypointIfPossible(Player player, String waypointName) {
         if (waypointNameNotProvided(player, waypointName)) {
             return;
         }
@@ -110,8 +110,7 @@ public class WaypointCommandsService implements CommandExecutor {
             player.sendMessage("There is no server waypoint with such name (" + waypointName + ")");
         } else {
             ServerWaypoint waypoint = serverWaypoint.get();
-            player.teleport(waypoint.getPlacement());
-            player.sendMessage(ChatUtils.asGreenMessage("Successfully moved to: " + waypointName));
+            movePlayerToWaypointAndApplyEffects(player, waypoint);
         }
     }
 
