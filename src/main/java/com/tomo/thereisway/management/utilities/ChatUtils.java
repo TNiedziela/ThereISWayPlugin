@@ -27,6 +27,10 @@ public class ChatUtils {
         return coloredMessage(text, ChatColor.GOLD);
     }
 
+    public static String withoutColor(String text) {
+        return ChatColor.stripColor(text);
+    }
+
     public static String asDarkPurpleMessage(String text) {
         return coloredMessage(text, ChatColor.DARK_PURPLE);
     }
