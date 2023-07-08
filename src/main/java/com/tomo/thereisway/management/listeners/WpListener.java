@@ -34,8 +34,13 @@ public class WpListener implements Listener {
     public void onWaypointEvent(WaypointRelatedEvent event) {
         if (event.getReason().equals(WaypointRelatedEvent.Reason.OPEN_SERVICE)) {
             waypointServiceGui = new WaypointServiceGui(plugin, event.getTrigger());
+            waypointServiceGui.loadFirstStep();
         } else if (event.getReason().equals(WaypointRelatedEvent.Reason.SAVE_EDIT)) {
             plugin.saveWaypoints();
+        }
+        else if (event.getReason().equals(WaypointRelatedEvent.Reason.OPEN_EDIT)) {
+            waypointServiceGui = new WaypointServiceGui(plugin, event.getTrigger());
+            waypointServiceGui.loadWaypointMainGui(event.getWaypoint(), -1);
         }
 
     }

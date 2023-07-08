@@ -2,6 +2,7 @@ package com.tomo.thereisway.management.utilities.gui;
 
 import com.tomo.thereisway.ThereISWay;
 import com.tomo.thereisway.management.commands.WaypointCommandsService;
+import com.tomo.thereisway.management.events.WaypointRelatedEvent;
 import com.tomo.thereisway.management.utilities.ChatUtils;
 import com.tomo.thereisway.management.waypoints.WaypointManagementService;
 import com.tomo.thereisway.waypoints.PlayerWaypoint;
@@ -35,7 +36,6 @@ public class WaypointServiceGui {
         waypointManagementService = new WaypointManagementService(plugin);
         commandsService = new WaypointCommandsService(plugin);
         populatePages();
-        loadFirstStep();
     }
 
     public void loadFirstStep() {
@@ -80,6 +80,10 @@ public class WaypointServiceGui {
             methodsMap.put(itemIndex, () -> loadWaypointMainGui(waypoint, page));
         }
 
+        if (page == 0) {
+            itemsMap.put(9, createGuiItem(Material.ARROW, ChatUtils.asBlueMessage("Return")));
+            methodsMap.put(9, this::loadFirstStep);
+        }
         if (page > 0) {
             itemsMap.put(9, createGuiItem(Material.ARROW, ChatUtils.asBlueMessage("Previous player waypoints")));
             methodsMap.put(9, () -> loadPlayerWaypointsPage(page - 1));
@@ -100,7 +104,7 @@ public class WaypointServiceGui {
         this.gui = gui;
     }
 
-    private void loadWaypointMainGui(Waypoint waypoint, int fromPage) {
+    public void loadWaypointMainGui(Waypoint waypoint, int fromPage) {
         Map<Integer, ItemStack> itemsMap = new HashMap<>();
         Map<Integer, Runnable> methodsMap = new HashMap<>();
         itemsMap.put(3, createGuiItem(Material.COMPASS,
@@ -115,11 +119,13 @@ public class WaypointServiceGui {
         }
         methodsMap.put(5, () -> loadWaypointEditGui(waypoint, fromPage));
 
-        itemsMap.put(9, createGuiItem(Material.ARROW, ChatUtils.asBlueMessage("Return")));
-        if (waypoint instanceof PlayerWaypoint) {
-            methodsMap.put(9, () -> loadPlayerWaypointsPage(fromPage));
-        } else {
-            methodsMap.put(9, () -> loadServerWaypointsPage(fromPage));
+        if (fromPage >= 0) {
+            itemsMap.put(9, createGuiItem(Material.ARROW, ChatUtils.asBlueMessage("Return")));
+            if (waypoint instanceof PlayerWaypoint) {
+                methodsMap.put(9, () -> loadPlayerWaypointsPage(fromPage));
+            } else {
+                methodsMap.put(9, () -> loadServerWaypointsPage(fromPage));
+            }
         }
 
         InventoryGui gui = InventoryGui.Builder.createBuilder()
@@ -156,7 +162,7 @@ public class WaypointServiceGui {
         Map<Integer, ItemStack> itemsMap = new HashMap<>();
         Map<Integer, Runnable> methodsMap = new HashMap<>();
         String crystalOnOrOff = waypoint.isEffectOn(WaypointEffect.ENDER_CRYSTAL) ? ChatUtils.asGreenMessage("ON") : ChatUtils.asRedMessage("OFF");
-        String nameOnOrOff = waypoint.isCrystalNameVisible() ? ChatUtils.asGreenMessage("ON") : ChatUtils.asRedMessage("OFF");
+        String nameOnOrOff = waypoint.isEffectOn(WaypointEffect.NAME_HOLO) ? ChatUtils.asGreenMessage("ON") : ChatUtils.asRedMessage("OFF");
 
         itemsMap.put(4, createGuiItem(Material.ENDER_EYE,
                 ChatUtils.asDarkPurpleMessage("Visibility"), ChatUtils.asGreenMessage("set crystal"), ChatUtils.asGreenMessage("visibility"), crystalOnOrOff));
@@ -187,15 +193,19 @@ public class WaypointServiceGui {
             spawnCrystalOnWaypoint(waypoint);
         }
         loadEnderCrystalEditGui(waypoint, fromPage);
+        WaypointRelatedEvent editEvent = WaypointRelatedEvent.waypointSaveEditEvent(waypoint, player);
+        editEvent.callEvent();
     }
 
     private void switchCrystalNameVisible(Waypoint waypoint, int fromPage) {
-        if (!waypoint.isCrystalNameVisible()) {
+        if (!waypoint.isEffectOn(WaypointEffect.NAME_HOLO)) {
                 waypoint.setCrystalNameVisible();
         } else {
                 waypoint.setCrystalNameNotVisible();
         }
         loadEnderCrystalEditGui(waypoint, fromPage);
+        WaypointRelatedEvent editEvent = WaypointRelatedEvent.waypointSaveEditEvent(waypoint, player);
+        editEvent.callEvent();
     }
 
     private void spawnCrystalOnWaypoint(Waypoint waypoint) {
@@ -218,6 +228,10 @@ public class WaypointServiceGui {
             methodsMap.put(itemIndex, () -> loadWaypointMainGui(waypoint, page));
         }
 
+        if (page == 0) {
+            itemsMap.put(9, createGuiItem(Material.ARROW, ChatUtils.asBlueMessage("Return")));
+            methodsMap.put(9, this::loadFirstStep);
+        }
         if (page > 0) {
             itemsMap.put(9, createGuiItem(Material.ARROW, ChatUtils.asBlueMessage("Previous server waypoints")));
             methodsMap.put(9, () -> loadServerWaypointsPage(page - 1));

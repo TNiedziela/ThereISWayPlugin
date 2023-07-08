@@ -3,6 +3,7 @@ package com.tomo.thereisway.waypoints;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -14,7 +15,6 @@ public abstract class Waypoint implements Serializable {
 
     protected String waypointName;
     protected Location placement;
-    protected boolean crystalNameShow = false;
 
     protected Map<WaypointEffect, Boolean> effects = WaypointEffect.getDefaultEffectsMap();
 
@@ -40,7 +40,16 @@ public abstract class Waypoint implements Serializable {
         }
         effects.put(effect, true);
         if (effect.equals(WaypointEffect.ENDER_CRYSTAL)) {
+            if (isEffectOn(WaypointEffect.NAME_HOLO)) {
+                spawnNameHoloCrystal();
+            }
             spawnEnderCrystal();
+        }
+
+        if (effect.equals(WaypointEffect.NAME_HOLO)) {
+            if (isEffectOn(WaypointEffect.ENDER_CRYSTAL)) {
+                spawnNameHoloCrystal();
+            }
         }
     }
 
@@ -51,6 +60,15 @@ public abstract class Waypoint implements Serializable {
         effects.put(effect, false);
         if (effect.equals(WaypointEffect.ENDER_CRYSTAL)) {
             despawnEnderCrystal();
+            if (isEffectOn(WaypointEffect.NAME_HOLO)) {
+                removeNameHolo();
+            }
+        }
+
+        if (effect.equals(WaypointEffect.NAME_HOLO)) {
+            if (isEffectOn(WaypointEffect.ENDER_CRYSTAL)) {
+                removeNameHolo();
+            }
         }
     }
 
@@ -67,7 +85,7 @@ public abstract class Waypoint implements Serializable {
         crystal.setBeamTarget(waypointPlacement.clone().subtract(0, 5, 0));
         crystal.setGravity(false);
         crystal.customName(Component.text(waypointName));
-        crystal.setCustomNameVisible(crystalNameShow);
+        crystal.setCustomNameVisible(isEffectOn(WaypointEffect.NAME_HOLO));
         linkEnderCrystalToWaypoint(crystal);
     }
 
@@ -78,38 +96,60 @@ public abstract class Waypoint implements Serializable {
         relatedEntities.put(WaypointEffect.ENDER_CRYSTAL, entity);
     }
 
-    public void setCrystalNameVisible() {
+    public void spawnNameHoloCrystal() {
+        Location waypointPlacement = getPlacement();
+        Location holoLocation = waypointPlacement.clone().add(0, 4, 0);
+        ArmorStand nameHolo = (ArmorStand) waypointPlacement.getWorld().spawnEntity(holoLocation, EntityType.ARMOR_STAND);
+        nameHolo.setInvulnerable(true);
+        nameHolo.setGravity(false);
+        nameHolo.setInvisible(true);
+        nameHolo.customName(Component.text(waypointName));
+        nameHolo.setCustomNameVisible(true);
+        linkNameHoloToWaypoint(nameHolo);
+    }
+
+    private void linkNameHoloToWaypoint(Entity entity) {
         if (Objects.isNull(relatedEntities)) {
-            crystalNameShow = true;
+            relatedEntities = new HashMap<>(); //after server restart.
+        }
+        relatedEntities.put(WaypointEffect.NAME_HOLO, entity);
+    }
+
+
+    public void setCrystalNameVisible() {
+        turnEffectOn(WaypointEffect.NAME_HOLO);
+        if (Objects.isNull(relatedEntities)) {
             return;
         }
         EnderCrystal crystal = (EnderCrystal) relatedEntities.getOrDefault(WaypointEffect.ENDER_CRYSTAL, null);
         if (Objects.nonNull(crystal)) {
             crystal.setCustomNameVisible(true);
-            crystalNameShow = true;
         }
     }
 
     public void setCrystalNameNotVisible() {
+        turnEffectOff(WaypointEffect.NAME_HOLO);
         if (Objects.isNull(relatedEntities)) {
-            crystalNameShow = false;
             return;
         }
         EnderCrystal crystal = (EnderCrystal) relatedEntities.getOrDefault(WaypointEffect.ENDER_CRYSTAL, null);
         if (Objects.nonNull(crystal)) {
             crystal.setCustomNameVisible(false);
-            crystalNameShow = false;
         }
-    }
-
-    public boolean isCrystalNameVisible() {
-        return crystalNameShow;
     }
 
     private void despawnEnderCrystal() {
         UUID entityID = relatedEntities.get(WaypointEffect.ENDER_CRYSTAL).getUniqueId();
         relatedEntities.get(WaypointEffect.ENDER_CRYSTAL).remove();
         relatedEntities.remove(WaypointEffect.ENDER_CRYSTAL);
+        placement.getWorld().getEntities()
+                .removeIf(entity -> entity.getUniqueId().equals(entityID));
+    }
+
+    private void removeNameHolo() {
+        UUID entityID = relatedEntities.get(WaypointEffect.NAME_HOLO).getUniqueId();
+        relatedEntities.get(WaypointEffect.NAME_HOLO).remove();
+        relatedEntities.remove(WaypointEffect.NAME_HOLO);
         placement.getWorld().getEntities()
                 .removeIf(entity -> entity.getUniqueId().equals(entityID));
     }
@@ -121,7 +161,7 @@ public abstract class Waypoint implements Serializable {
                 placement.getBlockY(),
                 placement.getBlockZ(),
                 isEffectOn(WaypointEffect.ENDER_CRYSTAL),
-                crystalNameShow,
+                isEffectOn(WaypointEffect.NAME_HOLO),
                 false,
                 "");
     }

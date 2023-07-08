@@ -7,7 +7,13 @@ import java.util.Map;
 import java.util.Optional;
 
 public enum WaypointEffect {
-    ENDER_CRYSTAL("enderCrystalEffect");
+    ENDER_CRYSTAL("enderCrystalEffect"),
+
+    /**
+     * Name holo will be visible only if some other effects are turned on, if it's the only
+     * turned on effect it will stay invisible.
+     */
+    NAME_HOLO("nameHolo");
 
     private final String effectName;
 

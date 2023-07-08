@@ -16,7 +16,9 @@ public class InventoryGui {
     Map<Integer, Runnable> slotToMethodMap;
 
     public void run(int slot) {
-        slotToMethodMap.get(slot).run();
+        if (slotToMethodMap.containsKey(slot)){
+            slotToMethodMap.get(slot).run();
+        }
     }
 
     Inventory getInventory() {

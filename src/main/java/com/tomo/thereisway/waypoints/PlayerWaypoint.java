@@ -64,7 +64,7 @@ public class PlayerWaypoint extends Waypoint{
                 placement.getBlockY(),
                 placement.getBlockZ(),
                 isEffectOn(WaypointEffect.ENDER_CRYSTAL),
-                crystalNameShow,
+                isEffectOn(WaypointEffect.NAME_HOLO),
                 true,
                 ownerID.toString());
     }
