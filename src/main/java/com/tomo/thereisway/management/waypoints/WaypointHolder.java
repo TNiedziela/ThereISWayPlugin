@@ -4,7 +4,6 @@ package com.tomo.thereisway.management.waypoints;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tomo.thereisway.waypoints.*;
-import org.bukkit.entity.Player;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 
@@ -82,7 +81,7 @@ public class WaypointHolder implements Serializable {
             writer.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -96,21 +95,14 @@ public class WaypointHolder implements Serializable {
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-            List<WaypointPOJO> waypoints = Arrays.stream(gson.fromJson(reader, WaypointPOJO[].class)).toList();
+            List<WaypointPOJO> waypointsPOJO = Arrays.stream(gson.fromJson(reader, WaypointPOJO[].class)).toList();
 
             WaypointHolder waypointHolder = new WaypointHolder();
-            waypoints.forEach(waypoint -> waypointHolder.addWaypoint(waypoint.toWaypoint()));
 
-            for (Waypoint waypoint : waypointHolder.playerWaypoints) {
-                if (waypoint.isEffectOn(WaypointEffect.ENDER_CRYSTAL)) {
-                    waypoint.spawnEnderCrystal();
-                }
-            }
-            for (Waypoint waypoint : waypointHolder.serverWaypoints) {
-                if (waypoint.isEffectOn(WaypointEffect.ENDER_CRYSTAL)) {
-                    waypoint.spawnEnderCrystal();
-                }
-            }
+            List<Waypoint> waypoints = new ArrayList<>();
+            waypointsPOJO.forEach(waypointPOJO -> waypoints.add(waypointPOJO.toWaypoint()));
+            waypoints.forEach(waypointHolder::addWaypoint);
+
             reader.close();
             return waypointHolder;
         } catch (Exception e) {
@@ -136,18 +128,27 @@ public class WaypointHolder implements Serializable {
         serverWaypoints.add(serverWaypoint);
     }
 
-    public void deletePlayerWaypoint(Player player, String waypointName) {
+    public void deleteWaypoint(Waypoint waypoint) {
+        if (waypoint instanceof PlayerWaypoint) {
+            deletePlayerWaypoint(waypoint);
+        } else {
+            deleteServerWaypoint(waypoint);
+        }
+    }
+
+    private void deletePlayerWaypoint(Waypoint waypoint) {
         for (int i = 0; i < playerWaypoints.size(); i++) {
-            if (playerWaypoints.get(i).isOwnedByPlayer(player) && playerWaypoints.get(i).getWaypointName().equals(waypointName)) {
+            if (playerWaypoints.get(i).equals(waypoint)) {
+                waypoint.removeRelatedEntitiesOnRemoval();
                 playerWaypoints.remove(i);
                 break;
             }
         }
     }
 
-    public void deleteServerWaypoint(String waypointName) {
+    private void deleteServerWaypoint(Waypoint waypoint) {
         for (int i = 0; i < serverWaypoints.size(); i++) {
-            if (serverWaypoints.get(i).getWaypointName().equals(waypointName)) {
+            if (serverWaypoints.get(i).equals(waypoint)) {
                 serverWaypoints.remove(i);
                 break;
             }

@@ -69,7 +69,7 @@ public class WaypointServiceGui {
 
 
     private void loadPlayerWaypointsPage(int page) {
-        List<PlayerWaypoint> pageWaypoints = playerWaypointPages.get(page);
+        List<PlayerWaypoint> pageWaypoints = playerWaypointPages.isEmpty() ? new ArrayList<>() : playerWaypointPages.get(page);
         Map<Integer, ItemStack> itemsMap = new HashMap<>();
         Map<Integer, Runnable> methodsMap = new HashMap<>();
 
@@ -199,9 +199,9 @@ public class WaypointServiceGui {
 
     private void switchCrystalNameVisible(Waypoint waypoint, int fromPage) {
         if (!waypoint.isEffectOn(WaypointEffect.NAME_HOLO)) {
-                waypoint.setCrystalNameVisible();
+            waypoint.turnEffectOn(WaypointEffect.NAME_HOLO);
         } else {
-                waypoint.setCrystalNameNotVisible();
+            waypoint.turnEffectOff(WaypointEffect.NAME_HOLO);
         }
         loadEnderCrystalEditGui(waypoint, fromPage);
         WaypointRelatedEvent editEvent = WaypointRelatedEvent.waypointSaveEditEvent(waypoint, player);
@@ -217,7 +217,7 @@ public class WaypointServiceGui {
     }
 
     private void loadServerWaypointsPage(int page) {
-        List<ServerWaypoint> pageWaypoints = serverWaypointPages.get(page);
+        List<ServerWaypoint> pageWaypoints = serverWaypointPages.isEmpty() ? new ArrayList<>() : serverWaypointPages.get(page);
         Map<Integer, ItemStack> itemsMap = new HashMap<>();
         Map<Integer, Runnable> methodsMap = new HashMap<>();
 

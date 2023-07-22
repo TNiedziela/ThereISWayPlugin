@@ -56,7 +56,7 @@ public class WaypointManagementService {
             player.sendMessage(ChatUtils.asRedMessage("You don't own waypoint with such name."));
             return;
         }
-        plugin.deletePlayerWaypoint(player, waypointName);
+        plugin.deleteWaypoint(desiredWaypoint.get());
         WaypointRelatedEvent event = WaypointRelatedEvent.waypointDeletedEvent(desiredWaypoint.get(), player);
         event.callEvent();
     }
@@ -71,7 +71,7 @@ public class WaypointManagementService {
             player.sendMessage(ChatUtils.asRedMessage("There is no global waypoint with such name."));
             return;
         }
-        plugin.deleteServerWaypoint(waypointName);
+        plugin.deleteWaypoint(desiredWaypoint.get());
         WaypointRelatedEvent event = WaypointRelatedEvent.waypointDeletedEvent(desiredWaypoint.get(), player);
         event.callEvent();
     }
@@ -124,7 +124,7 @@ public class WaypointManagementService {
 
     public void despawnEnderCrystalFromWaypoint(Waypoint waypoint) {
         waypoint.turnEffectOff(WaypointEffect.ENDER_CRYSTAL);
-        logger.info("Spawned ender crystal entity on waypoint " + waypoint.getWaypointName());
+        logger.info("Removed ender crystal entity on waypoint " + waypoint.getWaypointName());
     }
 
 }
